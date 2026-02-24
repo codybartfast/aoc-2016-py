@@ -1,5 +1,19 @@
+#  Day 01
+#  ======
+#
+#  Part 1: 246
+#  Part 2: 124
+#
+#  Timings
+#  ---------------------
+#    Parse:     0.000018
+#   Part 1:     0.000011
+#   Part 2:     0.000121
+#  Elapsed:     0.000192
+
 DIRS = ((0, -1), (1, 0), (0, 1), (-1, 0))
 NORTH = 0
+
 
 def parse(text):
     def parse_line(line):
@@ -9,7 +23,6 @@ def parse(text):
 
 
 def part1(instructions, args, state_for_part2):
-    print(instructions)
     dir = NORTH
     (x, y) = (0, 0)
     for turn, count in instructions:
@@ -21,8 +34,24 @@ def part1(instructions, args, state_for_part2):
     return abs(x) + abs(y)
 
 
-def part2(data, args, state_from_part1):
-    return "ans2"
+def part2(instructions, args, state_from_part1):
+    dir = NORTH
+    (x, y) = (0, 0)
+    visited = set([(x, y)])
+    revisited = None
+    for turn, count in instructions:
+        dir = (dir + turn) % 4
+        dx, dy = DIRS[dir]
+        for _ in range(count):
+            x += dx
+            y += dy
+            if (x, y) in visited and not revisited:
+                revisited = (x, y)
+            else:
+                visited.add((x, y))
+
+    if revisited:
+        return abs(revisited[0]) + abs(revisited[1])
 
 
 def jingle(filename=None, filepath=None, text=None, extra_args=None):
