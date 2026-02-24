@@ -1,3 +1,16 @@
+#  Day 03
+#  ======
+#
+#  Part 1: 993
+#  Part 2: 1849
+#
+#  Timings
+#  ---------------------
+#    Parse:     0.000924
+#   Part 1:     0.000232
+#   Part 2:     0.000368
+#  Elapsed:     0.001567
+
 import itertools
 
 
