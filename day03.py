@@ -18,15 +18,20 @@ def parse(text):
     return [tuple(map(int, line.split())) for line in text.splitlines()]
 
 
-def part1(triangles, args, state_for_part2):
+def count(triangles):
     return sum(1 for (a, b, c) in map(sorted, triangles) if a + b > c)
+
+
+def part1(triangles, args, state_for_part2):
+    return count(triangles)
 
 
 def part2(triangles, args, state_from_part1):
-    triangles = itertools.chain.from_iterable(
-        map(lambda batch: zip(*batch), itertools.batched(triangles, 3))
+    return count(
+        itertools.chain.from_iterable(
+            map(lambda batch: zip(*batch), itertools.batched(triangles, 3))
+        )
     )
-    return sum(1 for (a, b, c) in map(sorted, triangles) if a + b > c)
 
 
 def jingle(filename=None, filepath=None, text=None, extra_args=None):
