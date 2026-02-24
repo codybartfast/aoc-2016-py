@@ -1,9 +1,11 @@
 def parse(text):
     return text.splitlines()
 
-keypad = ["123", "456", "789"]
 
-def press_buttons(x, y, instrs):
+square_pad = ["123", "456", "789"]
+
+
+def press_square(x, y, instrs):
     keys = []
     for seq in instrs:
         for dir in seq:
@@ -16,17 +18,38 @@ def press_buttons(x, y, instrs):
                     y = min(2, y + 1)
                 case "L":
                     x = max(0, x - 1)
-        keys.append(keypad[y][x])
+        keys.append(square_pad[y][x])
     return keys
-        
+
+
+diamond_pad = ["  1  ", " 234 ", "56789", " ABC ", "  D  "]
+
+def press_diamond(x, y, instrs):
+    keys = []
+    for seq in instrs:
+        for dir in seq:
+            (x2, y2) = (x, y)
+            match dir:
+                case "U":
+                    y2 -= 1
+                case "R":
+                    x2 += 1
+                case "D":
+                    y2 += 1
+                case "L":
+                    x2 -= 1
+            if abs(x2 - 2) + abs(y2 - 2) < 3:
+                x, y = x2, y2
+        keys.append(diamond_pad[y][x]) 
+    return keys
+
 
 def part1(data, args, state_for_part2):
-    print(f"{data}\n\n")
-    return press_buttons(1, 1, data)
+    return "".join(press_square(1, 1, data))
 
 
 def part2(data, args, state_from_part1):
-    return "ans2"
+    return "".join(press_diamond(0, 2, data))
 
 
 def jingle(filename=None, filepath=None, text=None, extra_args=None):
