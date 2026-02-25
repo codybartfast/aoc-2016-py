@@ -6,13 +6,13 @@
 #
 #  Timings
 #  ---------------------
-#    Parse:     0.000242
-#   Part 1:     0.006013
-#   Part 2:     0.000167
-#  Elapsed:     0.006471
+#    Parse:     0.000256
+#   Part 1:     0.005761
+#   Part 2:     0.000160
+#  Elapsed:     0.006221
 
 
-from itertools import groupby
+from itertools import groupby, islice
 import string
 
 CHARS = string.ascii_lowercase
@@ -28,11 +28,12 @@ def parse(text):
 
 def checksum(name):
     groups = ((key, list(grpr)) for key, grpr in groupby(sorted(name)))
-    return "".join(
+    by_freq = (
         char
         for char, _ in sorted(groups, key=lambda grp: (-len(grp[1]), grp[0]))
         if char != "-"
-    )[:5]
+    )
+    return "".join(islice(by_freq, 5))
 
 
 def part1(rooms, args, state_for_part2):
@@ -42,9 +43,9 @@ def part1(rooms, args, state_for_part2):
 def part2(rooms, args, state_from_part1):
     for encr, sect, csum in rooms:
         # if checksum(encr) == csum:
-            name = encr.translate(translators[sect % 26])
-            if "north" in name:
-                return sect
+        name = encr.translate(translators[sect % 26])
+        if "north" in name:
+            return sect
 
 
 def jingle(filename=None, filepath=None, text=None, extra_args=None):
