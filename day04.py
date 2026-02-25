@@ -1,13 +1,21 @@
+
+# intentionally overusing itertools :-)
+from itertools import groupby
+
 def parse(text):
     def parse_line(line):
-        return [part for part in line.split()]
-
+        parts = line[:-7].split("-")
+        return parts[:-1], int(parts[-1]), line[-6:-1]
     return [parse_line(line) for line in text.splitlines()]
 
 
+def check_sum(name_parts):
+    groups = [(key, list(grpr)) for key, grpr in groupby(sorted("".join(name_parts)))]
+    return "". join(key for key, _ in sorted(groups, key=lambda grp: (-len(grp[1]), grp[0])))[:5]
+
+
 def part1(data, args, state_for_part2):
-    print(f"{data}\n\n")
-    return "ans1"
+    return sum(room[1] for room in data if check_sum(room[0])==room[2])
 
 
 def part2(data, args, state_from_part1):
