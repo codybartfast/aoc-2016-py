@@ -1,37 +1,50 @@
-from itertools import groupby
+#  Day 04
+#  ======
+#
+#  Part 1: 361724
+#  Part 2: 482
+#
+#  Timings
+#  ---------------------
+#    Parse:     0.000242
+#   Part 1:     0.006013
+#   Part 2:     0.000167
+#  Elapsed:     0.006471
 
-CHARS = "abcdefghijklmnopqrstuvwxyz"
+
+from itertools import groupby
+import string
+
+CHARS = string.ascii_lowercase
+
+translators = [
+    str.maketrans(CHARS, CHARS[shift:] + CHARS[:shift]) for shift in range(26)
+]
 
 
 def parse(text):
-    def parse_line(line):
-        return line[:-11], int(line[-10:-7]), line[-6:-1]
-
-    return [parse_line(line) for line in text.splitlines()]
+    return [(line[:-11], int(line[-10:-7]), line[-6:-1]) for line in text.splitlines()]
 
 
 def checksum(name):
     groups = ((key, list(grpr)) for key, grpr in groupby(sorted(name)))
     return "".join(
-        key
-        for key, _ in sorted(groups, key=lambda grp: (-len(grp[1]), grp[0]))
-        if key != "-"
+        char
+        for char, _ in sorted(groups, key=lambda grp: (-len(grp[1]), grp[0]))
+        if char != "-"
     )[:5]
 
 
 def part1(rooms, args, state_for_part2):
-    return sum(room[1] for room in rooms if checksum(room[0]) == room[2])
+    return sum(sect for encr, sect, csum in rooms if checksum(encr) == csum)
 
 
 def part2(rooms, args, state_from_part1):
-    for room in rooms:
-        encrpted, sector, csum = room
-        if checksum(encrpted) == csum:
-            shift = sector % 26
-            trans = str.maketrans(CHARS, CHARS[shift:] + CHARS[:shift])
-            name = encrpted.translate(trans)
+    for encr, sect, csum in rooms:
+        # if checksum(encr) == csum:
+            name = encr.translate(translators[sect % 26])
             if "north" in name:
-                return sector
+                return sect
 
 
 def jingle(filename=None, filepath=None, text=None, extra_args=None):
