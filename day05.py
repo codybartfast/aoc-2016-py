@@ -1,3 +1,4 @@
+#  Day 05
 #  ======
 #
 #  Part 1: 801b56a7
@@ -6,61 +7,74 @@
 #  Timings
 #  ---------------------
 #    Parse:     0.000001
-#   Part 1:     2.206225
-#   Part 2:     7.230639
-#  Elapsed:     9.436959
+#   Part 1:     2.113934
+#   Part 2:     4.780004
+#  Elapsed:     6.894021
 
+# I wonderd if the real perf hit with this was the construction of the candidates
+# like ("abc" + str(i)).encode() rather than the hashing. So I did some bit twiddling
+# and it looks like this is an order of magnitude faster than many solutions.
 
 from hashlib import md5
-from itertools import islice
 
 
 def parse(text):
     return text.encode()
 
 
-def search(prefix):
-    target = "0" * 5
-    base = md5(prefix)
-    sfx = bytearray([0x2F])
+def hash_search(prefix):
+    pfx_hash = md5(prefix)
+    suffix = bytearray([0x2F]) # char before '0'
     last_idx = 0
     idx = last_idx
     while True:
-        if sfx[idx] == 0x39:
-            sfx[idx] = 0x30
-            if idx == 0:
-                sfx.insert(0, 0x31)
-                last_idx += 1
-                idx = last_idx
-            else:
+        if suffix[idx] != 0x39: # '9'
+            suffix[idx] += 1
+            idx = last_idx
+        else:
+            suffix[idx] = 0x30 # '0'
+            if idx > 0:
                 idx -= 1
                 continue
-        else:
-            sfx[idx] += 1
-            idx = last_idx
-        hash = base.copy()
-        hash.update(sfx)
-        if hash.hexdigest().startswith(target):
+            else:
+                suffix.insert(0, 0x31) # '1'
+                last_idx += 1
+                idx = last_idx
+        hash = pfx_hash.copy()
+        hash.update(suffix)
+        if (
+            not hash.digest()[0]
+            and not hash.digest()[1]
+            and not hash.digest()[2] & 0xF0
+        ):
             yield hash.hexdigest()[5:7]
 
 
-def part1(data, args, state_for_part2):
-    return "".join(pair[0] for pair in islice(search(data), 8))
+def find_passwords(pairs):
+    pwd1 = ""
+    pwd2 = [None] * 8
+    for c1, c2 in pairs:
+        if len(pwd1) < 8:
+            pwd1 += c1
+            if len(pwd1) == 8:
+                yield pwd1
+        if c1 in "01234567":
+            pos = int(c1)
+            if not pwd2[pos]:
+                pwd2[pos] = c2
+            if all(pwd2):
+                yield "".join(pwd2)
+                return
 
 
-def part2(data, args, state_from_part1):
-    pwd = ["-"] * 8
-    for pair in search(data):
-        pos, val = pair[0], pair[1]
-        if pos in "01234567":
-            pos = int(pos)
-            if pwd[pos] == "-":
-                pwd[pos] = val
-            if "-" not in pwd:
-                break
-        else:
-            continue
-    return "".join(pwd)
+def part1(door_id, args, state_for_part2):
+    passwords = find_passwords(hash_search(door_id))
+    state_for_part2["passwords"] = passwords
+    return next(passwords)
+
+
+def part2(door_id, args, state_from_part1):
+    return next(state_from_part1["passwords"])
 
 
 def jingle(filename=None, filepath=None, text=None, extra_args=None):
