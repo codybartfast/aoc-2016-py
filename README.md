@@ -1,9 +1,9 @@
 # Advent of Code 2016 in Python
 
-[Advent of Code 2016](https://adventofcode.com/2016) using Python
+Hacking EBHQ for Santa in the timely [Advent of Code 2016](https://adventofcode.com/2016)
 
-This is my second 2016 solution, for fun and Python practice.
+Launched in 2026, this is my second Advent 2016 campaign.
 
 
 [Primary Source](https://git.sr.ht/~codybartfast/aoc-2016-py)  
-[Other Events](https://sr.ht/~codybartfast/aoc/sources)
+[Other Campaigns](https://sr.ht/~codybartfast/aoc/sources)
