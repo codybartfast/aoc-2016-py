@@ -1,3 +1,16 @@
+#  ======
+#
+#  Part 1: 801b56a7
+#  Part 2: 424a0197
+#
+#  Timings
+#  ---------------------
+#    Parse:     0.000001
+#   Part 1:     2.206225
+#   Part 2:     7.230639
+#  Elapsed:     9.436959
+
+
 from hashlib import md5
 from itertools import islice
 
@@ -28,15 +41,26 @@ def search(prefix):
         hash = base.copy()
         hash.update(sfx)
         if hash.hexdigest().startswith(target):
-            yield hash.hexdigest()[5]
+            yield hash.hexdigest()[5:7]
 
 
 def part1(data, args, state_for_part2):
-    return "".join(islice(search(data), 8))
+    return "".join(pair[0] for pair in islice(search(data), 8))
 
 
 def part2(data, args, state_from_part1):
-    return "ans2"
+    pwd = ["-"] * 8
+    for pair in search(data):
+        pos, val = pair[0], pair[1]
+        if pos in "01234567":
+            pos = int(pos)
+            if pwd[pos] == "-":
+                pwd[pos] = val
+            if "-" not in pwd:
+                break
+        else:
+            continue
+    return "".join(pwd)
 
 
 def jingle(filename=None, filepath=None, text=None, extra_args=None):
