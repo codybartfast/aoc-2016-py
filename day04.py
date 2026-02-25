@@ -27,6 +27,7 @@ def parse(text):
 
 
 def checksum(name):
+    # Wasn't aware of Counter until I read other people's solutions after completing this
     groups = ((key, list(grpr)) for key, grpr in groupby(sorted(name)))
     by_freq = (
         char
