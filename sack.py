@@ -46,6 +46,7 @@ def present(text, extra_args, parse, part1, part2):
         def __init__(self):
             self.ans1 = None
             self.value = None
+
     state = State()
 
     pc_start = time.perf_counter()
@@ -84,3 +85,29 @@ def present(text, extra_args, parse, part1, part2):
     h_print(f" Part 2: {pc_part2_after - pc_part2_before:12.6f}")
     h_print(f"Elapsed: {pc_stop - pc_start:12.6f}")
     print()
+
+
+def read_glyphs(glyphs):
+
+    alphabet = "ABCEFGHIJKLOPRSUYZ"
+    glyphabet = [
+        ".##..###...##..####.####..##..#..#..###...##.#..#.#.....##..###..###...###.#..#.#...#####.",
+        "#..#.#..#.#..#.#....#....#..#.#..#...#.....#.#.#..#....#..#.#..#.#..#.#....#..#.#...#...#.",
+        "#..#.###..#....###..###..#....####...#.....#.##...#....#..#.#..#.#..#.#....#..#..#.#...#..",
+        "####.#..#.#....#....#....#.##.#..#...#.....#.#.#..#....#..#.###..###...##..#..#...#...#...",
+        "#..#.#..#.#..#.#....#....#..#.#..#...#..#..#.#.#..#....#..#.#....#.#.....#.#..#...#..#....",
+        "#..#.###...##..####.#.....###.#..#..###..##..#..#.####..##..#....#..#.###...##....#..####.",
+    ]
+
+    def split_glyphs(glyphs):
+        transposed = list(zip(*glyphs))
+        # print(transposed)
+        sep_glyphs = []
+        while transposed:
+            tp_glyph, transposed = transposed[:5], transposed[5:]
+            sep_glyphs.append("\n".join("".join(row) for row in zip(*tp_glyph)))
+        return sep_glyphs
+
+    glyph_dict = dict(zip(split_glyphs(glyphabet), alphabet))
+
+    return "".join(glyph_dict[glyph] for glyph in split_glyphs(glyphs))

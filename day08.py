@@ -2,20 +2,14 @@
 #  ======
 #
 #  Part 1: 106
- ##  #### #    #### #     ##  #   #####  ##   ###
-#  # #    #    #    #    #  # #   ##    #  # #
-#    ###  #    ###  #    #  #  # # ###  #    #
-#    #    #    #    #    #  #   #  #    #     ##
-#  # #    #    #    #    #  #   #  #    #  #    #
- ##  #    #### #### ####  ##    #  #     ##  ###
-#  Part 2: ans2
+#  Part 2: CFLELOYFCS
 #
 #  Timings
 #  ---------------------
-#    Parse:     0.000193
-#   Part 1:     0.000081
-#   Part 2:     0.000008
-#  Elapsed:     0.000333
+#    Parse:     0.000177
+#   Part 1:     0.000078
+#   Part 2:     0.000048
+#  Elapsed:     0.000346
 
 import re
 
@@ -44,28 +38,23 @@ def modify(screen, instr):
             col = col[-n2:] + col[:-n2]
             for y in range(len(screen)):
                 screen[y][n1] = col[y]
-        case _:
-            raise RuntimeError("oops")
 
 
-def display(screen):
-    print("\n".join("".join(row) for row in screen))
-
-
-def part1(data, args, p1_state):
+def part1(instructions, args, p1_state):
     w, h = 50, 6
-    screen = [[" "] * w for _ in range(h)]
+    screen = [["."] * w for _ in range(h)]
 
-    for instr in data:
+    for instr in instructions:
         modify(screen, instr)
 
     p1_state.value = screen
     return sum(1 for row in screen for pixel in row if pixel == "#")
 
 
-def part2(data, args, p1_state):
-    display(p1_state.value)
-    return "ans2"
+def part2(instructions, args, p1_state):
+    import sack
+
+    return sack.read_glyphs(p1_state.value)
 
 
 def jingle(filepath=None, text=None, extra_args=None):
