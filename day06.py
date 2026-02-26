@@ -1,3 +1,16 @@
+#  Day 06
+#  ======
+#
+#  Part 1: qoclwvah
+#  Part 2: ryrgviuv
+#
+#  Timings
+#  ---------------------
+#    Parse:     0.000014
+#   Part 1:     0.000405
+#   Part 2:     0.000122
+#  Elapsed:     0.000583
+
 from collections import Counter
 
 def parse(text):
@@ -8,8 +21,8 @@ def part1(repitions, args, state_for_part2):
     return "".join(Counter(col).most_common(1)[0][0] for col in zip(*repitions))
 
 
-def part2(data, args, state_from_part1):
-    return "ans2"
+def part2(repitions, args, state_from_part1):
+    return "".join(Counter(col).most_common()[-1][0] for col in zip(*repitions))
 
 
 def jingle(filepath=None, text=None, extra_args=None):
