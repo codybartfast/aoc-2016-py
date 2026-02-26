@@ -6,23 +6,26 @@
 #
 #  Timings
 #  ---------------------
-#    Parse:     0.000014
-#   Part 1:     0.000405
-#   Part 2:     0.000122
-#  Elapsed:     0.000583
+#    Parse:     0.000016
+#   Part 1:     0.000125
+#   Part 2:     0.000002
+#  Elapsed:     0.000181
 
 from collections import Counter
+
 
 def parse(text):
     return text.splitlines()
 
 
 def part1(repitions, args, state_for_part2):
-    return "".join(Counter(col).most_common(1)[0][0] for col in zip(*repitions))
+    most_commons = [Counter(col).most_common() for col in zip(*repitions)]
+    state_for_part2["mcs"] = most_commons
+    return "".join(mc[0][0] for mc in most_commons)
 
 
 def part2(repitions, args, state_from_part1):
-    return "".join(Counter(col).most_common()[-1][0] for col in zip(*repitions))
+    return "".join(mc[-1][0] for mc in state_from_part1["mcs"])
 
 
 def jingle(filepath=None, text=None, extra_args=None):
