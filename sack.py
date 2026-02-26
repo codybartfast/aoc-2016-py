@@ -4,7 +4,8 @@ import sys
 
 YEAR = "2016"
 
-def _day():
+
+def get_day():
     filename = Path(sys._getframe(2).f_code.co_filename).name
 
     day_match = re.search(r"day(\d\d)", filename)
@@ -13,18 +14,26 @@ def _day():
     return day_match.group(1)
 
 
-def read_input(filename=None, filepath=None):
-    if not filepath:
-        if filename is None:
-            filename = "input"
-        if "." not in filename:
-            filename += ".txt"
-        day = _day()
-        filepath = Path(__file__).resolve().parent / "input" / YEAR
-        filepath = filepath / f"day{day}" / f"{filename}"
-    with open(filepath, encoding="utf-8") as f:
-        text = f.read()
-    return text.rstrip("\n")
+def get_filepath(file):
+    if not file:
+        file = "input"
+    canonical = (
+        Path(__file__).resolve().parent
+        / "input"
+        / YEAR
+        / f"day{get_day()}"
+        / (file + ".txt")
+    )
+    if canonical.is_file():
+        return canonical
+    other = Path(file)
+    if other.is_file():
+        return other
+    print()
+    print("Couldn't find input file.")
+    print(f"Tried: '{canonical}'")
+    print(f"  and: '{other.resolve()}'")
+    return None
 
 
 def present(text, extra_args, parse, part1, part2):
@@ -36,7 +45,7 @@ def present(text, extra_args, parse, part1, part2):
     state = {}
 
     pc_start = time.perf_counter()
-    day = _day()
+    day = get_day()
 
     title = f"Day {day}"
 
