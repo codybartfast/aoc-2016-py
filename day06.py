@@ -18,14 +18,14 @@ def parse(text):
     return text.splitlines()
 
 
-def part1(repitions, args, state_for_part2):
+def part1(repitions, args, p1_state):
     most_commons = [Counter(col).most_common() for col in zip(*repitions)]
-    state_for_part2["mcs"] = most_commons
+    p1_state.value = most_commons
     return "".join(mc[0][0] for mc in most_commons)
 
 
-def part2(repitions, args, state_from_part1):
-    return "".join(mc[-1][0] for mc in state_from_part1["mcs"])
+def part2(repitions, args, p1_state):
+    return "".join(mc[-1][0] for mc in p1_state.value)
 
 
 def jingle(filepath=None, text=None, extra_args=None):

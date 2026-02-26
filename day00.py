@@ -5,12 +5,12 @@ def parse(text):
     return [parse_line(line) for line in text.splitlines()]
 
 
-def part1(data, args, state_for_part2):
+def part1(data, args, p1_state):
     print(f"{data}\n\n")
     return "ans1"
 
 
-def part2(data, args, state_from_part1):
+def part2(data, args, p1_state):
     return "ans2"
 
 
