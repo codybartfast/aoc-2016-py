@@ -7,7 +7,6 @@ def does_support_tls(address):
     depth = 0
     got_abba = False
     for idx, char in enumerate(address):
-        assert depth >= 0
         match char:
             case "[":
                 depth += 1
@@ -19,7 +18,7 @@ def does_support_tls(address):
                 len += 1
                 if len >= 4:
                     if (
-                        char == address[idx - 3]
+                        address[idx - 3] == char
                         and address[idx - 2] == address[idx - 1]
                         and address[idx - 1] != char
                     ):
@@ -30,12 +29,41 @@ def does_support_tls(address):
     return got_abba
 
 
+def does_support_ssl(address):
+    len = 0
+    depth = 0
+    super_trips = set()
+    hyper_trips = set()
+    for idx, char in enumerate(address):
+        match char:
+            case "[":
+                len = 0
+                depth += 1
+            case "]":
+                len = 0
+                depth -= 1
+            case _:
+                len += 1
+                if len >= 3:
+                    prev = address[idx - 1]
+                    if address[idx - 2] == char and prev != char:
+                        if depth:
+                            this, other = hyper_trips, super_trips
+                        else:
+                            this, other = super_trips, hyper_trips
+                        twin = prev + char + prev
+                        if twin in other:
+                            return True
+                        this.add(char + prev + char)
+    return False
+
+
 def part1(data, args, p1_state):
     return sum(1 for address in data if does_support_tls(address))
 
 
 def part2(data, args, p1_state):
-    return "ans2"
+    return sum(1 for address in data if does_support_ssl(address))
 
 
 def jingle(filepath=None, text=None, extra_args=None):
