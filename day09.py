@@ -2,56 +2,58 @@
 #  ======
 #
 #  Part 1: 112830
-#  Part 2: ans2
+#  Part 2: 10931789799
 #
 #  Timings
 #  ---------------------
 #    Parse:     0.000000
 #   Part 1:     0.000013
-#   Part 2:     0.000000
-#  Elapsed:     0.000047
+#   Part 2:     0.000751
+#  Elapsed:     0.000806
 
-from day03 import count
+
 def parse(text):
     return text
 
 
-def calc_length(data):
+def decomp_length(data, start=None, end=None, ver="v2"):
+    idx = start if start else 0
+    end = end if end else len(data)
     length = 0
-    idx = 0
-    while idx < len(data):
+    while idx < end:
         if data[idx] != "(":
             # print(data[idx], end="")
             length += 1
             idx += 1
         else:
-            count_digits = ""
+            comp_len_digits = ""
             rep_digits = ""
 
             idx += 1
             while data[idx] != "x":
-                count_digits += data[idx]
+                comp_len_digits += data[idx]
                 idx += 1
-            idx +=1
+            idx += 1
             while data[idx] != ")":
                 rep_digits += data[idx]
                 idx += 1
             idx += 1
-            count = int(count_digits)
-            # print(f"<span {count * int(rep_digits)}>", end="")
-            length += count * int(rep_digits)
-            idx += count
+            comp_len = int(comp_len_digits)
+            if ver == "v2":
+                length += int(rep_digits) * decomp_length(data, idx, idx + comp_len)
+            else:
+                length += int(rep_digits) * comp_len
+            idx += comp_len
     # print("\n")
     return length
-            
-            
+
 
 def part1(data, args, p1_state):
-    return calc_length(data)
+    return decomp_length(data, ver="v1")
 
 
 def part2(data, args, p1_state):
-    return "ans2"
+    return decomp_length(data, ver="v2")
 
 
 def jingle(filepath=None, text=None, extra_args=None):
