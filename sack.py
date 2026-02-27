@@ -100,11 +100,10 @@ def read_glyphs(glyphs):
     ]
 
     def split_glyphs(glyphs):
-        transposed = list(zip(*glyphs))
-        # print(transposed)
+        tp_glyphs = list(zip(*glyphs))
         sep_glyphs = []
-        while transposed:
-            tp_glyph, transposed = transposed[:5], transposed[5:]
+        while tp_glyphs:
+            tp_glyph, tp_glyphs = tp_glyphs[:5], tp_glyphs[5:]
             sep_glyphs.append("\n".join("".join(row) for row in zip(*tp_glyph)))
         return sep_glyphs
 
