@@ -19,33 +19,30 @@ def parse(text):
 def decomp_length(data, start=None, end=None, ver="v2"):
     idx = start if start else 0
     end = end if end else len(data)
-    length = 0
+    dc_len = 0
     while idx < end:
         if data[idx] != "(":
-            # print(data[idx], end="")
-            length += 1
+            dc_len += 1
             idx += 1
         else:
-            comp_len_digits = ""
-            rep_digits = ""
+            cmpr_len_digits = ""
+            rept_digits = ""
 
             idx += 1
             while data[idx] != "x":
-                comp_len_digits += data[idx]
+                cmpr_len_digits += data[idx]
                 idx += 1
             idx += 1
             while data[idx] != ")":
-                rep_digits += data[idx]
+                rept_digits += data[idx]
                 idx += 1
             idx += 1
-            comp_len = int(comp_len_digits)
-            if ver == "v2":
-                length += int(rep_digits) * decomp_length(data, idx, idx + comp_len)
-            else:
-                length += int(rep_digits) * comp_len
-            idx += comp_len
-    # print("\n")
-    return length
+            cmpr_len = int(cmpr_len_digits)
+            dc_len += int(rept_digits) * (
+                decomp_length(data, idx, idx + cmpr_len) if ver == "v2" else cmpr_len
+            )
+            idx += cmpr_len
+    return dc_len
 
 
 def part1(data, args, p1_state):
