@@ -2,14 +2,14 @@
 #  ======
 #
 #  Part 1: 147
-#  Part 2: ans2
+#  Part 2: 55637
 #
 #  Timings
 #  ---------------------
-#    Parse:     0.000144
-#   Part 1:     0.000012
-#   Part 2:     0.000000
-#  Elapsed:     0.000194
+#    Parse:     0.000159
+#   Part 1:     0.000020
+#   Part 2:     0.000050
+#  Elapsed:     0.000273
 
 
 BOT_VALUE = 0
@@ -56,6 +56,8 @@ def move_chips(bots, outputs, value, dest):
     kind, id = dest
     if kind == "o":
         outputs[id].append(value)
+        if all(len(output) == 1 for output in outputs[:3]):
+            yield outputs[0][0] * outputs[1][0] * outputs[2][0]
     else:
         assert kind == "b"
         bot = bots[id]
@@ -66,23 +68,22 @@ def move_chips(bots, outputs, value, dest):
             if low > high:
                 low, high = high, low
             if (low, high) == (17, 61):
-                return id
+                yield id
             bots[id][BOT_VALUE] = None
-            return move_chips(bots, outputs, low, bot[BOT_LOW]) or move_chips(
-                bots, outputs, high, bot[BOT_HIGH]
-            )
+            yield from move_chips(bots, outputs, low, bot[BOT_LOW])
+            yield from move_chips(bots, outputs, high, bot[BOT_HIGH])
 
 
 def part1(data, args, p1_state):
-    bots, outputs, pending = data
+    bots, outputs, (value, dest) = data
 
-    return move_chips(bots, outputs, pending[0], pending[1])
-
-    return "ans1"
+    answers = move_chips(bots, outputs, value, dest)
+    p1_state.value = answers
+    return next(answers)
 
 
 def part2(data, args, p1_state):
-    return "ans2"
+    return next(p1_state.value)
 
 
 def jingle(filepath=None, text=None, extra_args=None):
