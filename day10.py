@@ -6,10 +6,10 @@
 #
 #  Timings
 #  ---------------------
-#    Parse:     0.000159
-#   Part 1:     0.000020
-#   Part 2:     0.000050
-#  Elapsed:     0.000273
+#    Parse:     0.000149
+#   Part 1:     0.000019
+#   Part 2:     0.000047
+#  Elapsed:     0.000259
 
 
 BOT_VALUE = 0
@@ -52,32 +52,32 @@ def parse(text):
     return bots, outputs, pending[0]
 
 
-def move_chips(bots, outputs, value, dest):
+def move_chip(bots, outputs, chip, dest):
     kind, id = dest
     if kind == "o":
-        outputs[id].append(value)
+        outputs[id].append(chip)
         if all(len(output) == 1 for output in outputs[:3]):
             yield outputs[0][0] * outputs[1][0] * outputs[2][0]
     else:
         assert kind == "b"
         bot = bots[id]
         if bot[BOT_VALUE] is None:
-            bot[BOT_VALUE] = value
+            bot[BOT_VALUE] = chip
         else:
-            low, high = value, bot[BOT_VALUE]
+            low, high = chip, bot[BOT_VALUE]
             if low > high:
                 low, high = high, low
             if (low, high) == (17, 61):
                 yield id
             bots[id][BOT_VALUE] = None
-            yield from move_chips(bots, outputs, low, bot[BOT_LOW])
-            yield from move_chips(bots, outputs, high, bot[BOT_HIGH])
+            yield from move_chip(bots, outputs, low, bot[BOT_LOW])
+            yield from move_chip(bots, outputs, high, bot[BOT_HIGH])
 
 
 def part1(data, args, p1_state):
-    bots, outputs, (value, dest) = data
+    bots, outputs, (chip, dest) = data
 
-    answers = move_chips(bots, outputs, value, dest)
+    answers = move_chip(bots, outputs, chip, dest)
     p1_state.value = answers
     return next(answers)
 
