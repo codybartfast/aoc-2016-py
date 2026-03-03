@@ -1,7 +1,7 @@
 import re
 
-UP = +1
-DOWN = -1
+U = +1
+D = -1
 
 
 def parse(text):
@@ -81,12 +81,14 @@ class Facility:
         lone_chips = [el for el in chips if el not in pairs]
         return lone_gens, pairs, lone_chips
 
-    def move(self, dir, gens, chips):
+    def m(self, dir, gens, chips=[]):
+        gens = gens if type(gens) is list else [gens]
+        chips = chips if type(chips) is list else [chips]
         print(
-            f"Moving {'Up' if dir == UP else 'Down'}, generators:{gens}, chips:{chips}"
+            f"Moving {'Up' if dir == U else 'Down'}, generators:{gens}, chips:{chips}"
         )
         size = len(gens) + len(chips)
-        if dir == UP and size == 1:
+        if dir == U and size == 1:
             print("***************")
         assert 0 < size < 3 , "move takes 1 or 2 items"
         dest = self.flr + dir
@@ -106,27 +108,28 @@ def isolate_chips_on_1st(facility):
     # assumes lift on 1st, leaves it on 2nd
     match facility.by_matched():
         case ([], [pair], []):
-            facility.move(UP, [pair], [pair])
+            facility.move(U, [pair], [pair])
             return pair
 
 
-def clear_most_from_3rd(facility, chap):
+def clear_most_from_3rd(f, chap):
     # assumes lift on 2nd, leaves on 2nd
     while True:
-        match facility.by_matched(2):
+        match f.by_matched(2):
             case ([], [], [chip1, chip2]):
-                facility.move(UP, [chip1, chip2], [])
-                facility.move(UP, [chip1], [chip1])
-                facility.move(DOWN, [chip1], [])
-                facility.move(UP, [chip1, chip2], [])
-                facility.move(DOWN, [chip2], [])
-                facility.move(DOWN, [chip2], [])
-                facility.move(DOWN, [chap], [chap])
-                facility.move(UP, [chap], [])
+                f.move(U, [chip1, chip2], [])
+                f.move(U, [chip1], [chip1])
+                f.move(D, [chip1], [])
+                f.move(U, [chip1, chip2], [])
+                f.move(D, [chip2], [])
+                f.move(D, [chip2], [])
+                exit()
+                f.move(D, [chap], [chap])
+                f.move(U, [chap], [])
                 return None, chip2
             case ([], [], [chip, _, *_]):
-                facility.move(UP, [], [chap])
-                facility.move(DOWN, [], [chip, chap])
+                f.move(U, [], [chap])
+                f.move(D, [], [chip, chap])
             case _:
                 raise RuntimeError("oops")
 
@@ -134,14 +137,14 @@ def clear_most_from_3rd(facility, chap):
 def move_pairs_from_2nd_to_4th(facility, chap, leading_chip=None):
     def move_pair(pair):
         if not leading_chip:
-            facility.move(UP, [pair], [pair])
-            facility.move(DOWN, [pair], [])
-        facility.move(UP, [chap, pair], [])
-        facility.move(UP, [chap, pair], [])
-        facility.move(DOWN, [pair], [])
-        facility.move(UP, [pair], [pair])
-        facility.move(DOWN, [chap], [])
-        facility.move(DOWN, [chap], [])
+            facility.move(U, [pair], [pair])
+            facility.move(D, [pair], [])
+        facility.move(U, [chap, pair], [])
+        facility.move(U, [chap, pair], [])
+        facility.move(D, [pair], [])
+        facility.move(U, [pair], [pair])
+        facility.move(D, [chap], [])
+        facility.move(D, [chap], [])
 
         
     if leading_chip:
@@ -153,20 +156,76 @@ def move_pairs_from_2nd_to_4th(facility, chap, leading_chip=None):
 
 
 def end(facility, chap):
-    facility.move(DOWN, [chap], [])
-    facility.move(UP, [chap], [chap])
-    facility.move(UP, [chap], [chap])
-    facility.move(UP, [chap], [chap])
+    facility.move(D, [chap], [])
+    facility.move(U, [chap], [chap])
+    facility.move(U, [chap], [chap])
+    facility.move(U, [chap], [chap])
 
 
-def part1(facility, args, p1_state):
-    facility.display()
-    chaperone = isolate_chips_on_1st(facility)
-    rmn_gen, rmn_chip = clear_most_from_3rd(facility, chaperone)
-    assert not rmn_gen
-    move_pairs_from_2nd_to_4th(facility, chaperone, rmn_chip)
-    end(facility, chaperone)
-    return "ans1"
+def manual(facility):
+    ""
+
+
+def part1(f, args, p1_state):
+    f.display()
+
+    gens, pairs, chips = f.by_matched()
+    chap = pairs[0]
+    f.m(U, pairs, pairs)
+    
+    f.m(U, [], chap)
+    gens, pairs, chips = f.by_matched()
+    f.m(D, [], [chap, chips[0]])
+
+    f.m(U, [], chap)
+    f.m(U, [], [chap, chips[1]])
+    f.m(D, [], chap)
+    f.m(D, [], [chap, "Ru"])
+
+    f.m(U, ["Pl", "Cu"])
+    f.m(D, "Cu")
+    f.m(U, "Co", "Co")
+    f.m(U, [], ["Co", "Pl"])
+    f.m(D, [], "Pl")
+    f.m(D, "Pl", "Pl")
+    
+    f.m(U, "Cu")
+    f.m(U, ["Co", "Cu"])
+    f.m(D, "Cu", "Cu")
+    f.m(D, "Cu")
+    
+    f.m(U, [], ["Pr", "Ru"])
+    f.m(D, [], "Cu")
+    f.m(U, ["Pr", "Ru"])
+    f.m(U, ["Pr", "Ru"])
+    f.m(D, [], "Co")
+    f.m(U, [], ["Pr", "Ru"])
+    f.m(D, "Co")
+    f.m(D, "Co")
+
+    f.m(U, [], ["Pl", "Cu"])
+    f.m(D, [], "Co")
+
+    f.m(U, ["Pl", "Cu"])
+    f.m(U, ["Pl", "Cu"])
+    f.m(D, [], "Pr")
+    f.m(U, [], ["Pl", "Cu"])
+    f.m(D, [], "Ru")
+    f.m(U, [], ["Pr", "Ru"])
+    
+    exit()
+
+
+
+
+    
+    # chaperone = isolate_chips_on_1st(facility)
+    # rmn_gen, rmn_chip = clear_most_from_3rd(facility, chaperone)
+    # assert not rmn_gen
+    # move_pairs_from_2nd_to_4th(facility, chaperone, rmn_chip)
+    # end(facility, chaperone)
+    # return "ans1"
+    
 
 
 def part2(floors, args, p1_state):
