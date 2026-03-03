@@ -1,7 +1,8 @@
+from itertools import combinations, zip_longest
 import re
 
-U = +1
-D = -1
+UP = +1
+DOWN = -1
 
 
 def parse(text):
@@ -11,49 +12,46 @@ def parse(text):
         floor = [[], []]
         for material, type in rx.findall(line):
             floor[0 if type == "generator" else 1].append(material[:2].title())
+        floor[0].sort(), floor[1].sort()
         return floor
 
     floors = [parse_line(line) for line in (text.splitlines())]
-    return Facility(floors)
+    return Facility(floors, 0, 0)
 
 
-# reversed floors
-
-# Strategy #3?
-#   - clear all from 1st except one chip
-#   - move chips down from 3rd except one chip
-#   - move up first pair
-#   - jiggle up remaining pairs on 2nd, but one
-#   - move up last 2nd pair
-#   - move up 1st chip
+class State:
+    def __init__(self, max_moves):
+        self.known = {}
+        self.facility_count = 0
+        self.max_moves = max_moves
 
 
 class Facility:
-    def __init__(self, floors):
+    def __init__(self, floors, flr, count):
         self.floors = floors
         self.size = len(floors)
-        self.flr = 0
-        self.count = 0
-        self.have_collected_gens = False
+        self.flr = flr
+        self.count = count
 
     def display(self):
-        lines = [f"{"E" if i == self.flr else " "} {floor}" for i, floor in enumerate(self.floors)]
-        print("\n".join(reversed(lines)))
-        print("count:", self.count)
-        print()
+        print(self.signature())
+        print(f"count: {self.count}")
+
+    def signature(self):
+        lines = [
+            f"{'E' if i == self.flr else ' '} {floor}"
+            for i, floor in enumerate(self.floors)
+        ]
+        lines.reverse()
+        # lines.append(f"count: {self.count}")
+        return "\n".join(lines)
+
+    def copy(self):
+        n_floors = [(list(gens), list(chips)) for [gens, chips] in self.floors]
+        return Facility(n_floors, self.flr, self.count)
 
     def done(self):
-        return not any(lst for floor in self.floors for lst in floor)
-
-    def gens(self, flr=None):
-        if flr is None:
-            flr = self.flr
-        return self.floors[flr][0]
-
-    def chips(self, flr=None):
-        if flr is None:
-            flr = self.flr
-        return self.floors[flr][1]
+        return not any(gens or chips for gens, chips in self.floors[:-1])
 
     def is_valid(self):
         for floor in self.floors:
@@ -61,174 +59,135 @@ class Facility:
                 assert False  # Invalid State
         return True
 
-    def find_gen(self, gen):
-        for flr in range(self.size):
-            if gen in self.gens(flr):
-                return flr
-
-    def find_chip(self, chip):
-        for flr in range(self.size):
-            if chip in self.chips(flr):
-                return flr
-
-    def by_matched(self, flr=None):
+    def floor(self, flr=None):
         if flr is None:
             flr = self.flr
-        gens, chips = self.gens(flr), self.chips(flr)
-        # print(self.flr, self.floors[self.flr], gens, chips)
-        pairs = [el for el in gens if el in chips]
-        lone_gens = [el for el in gens if el not in pairs]
-        lone_chips = [el for el in chips if el not in pairs]
-        return lone_gens, pairs, lone_chips
+        return self.floors[flr]
 
-    def m(self, dir, gens, chips=[]):
-        gens = gens if type(gens) is list else [gens]
-        chips = chips if type(chips) is list else [chips]
-        print(
-            f"Moving {'Up' if dir == U else 'Down'}, generators:{gens}, chips:{chips}"
-        )
-        size = len(gens) + len(chips)
-        if dir == U and size == 1:
-            print("***************")
-        assert 0 < size < 3 , "move takes 1 or 2 items"
-        dest = self.flr + dir
-        for gen in gens:
-            self.gens().remove(gen)
-            self.gens(dest).append(gen)
-        for chip in chips:
-            self.chips().remove(chip)
-            self.chips(dest).append(chip)
+    def lower(self):
+        if self.flr == 0:
+            return None
+        return self.floors[self.flr - 1]
+
+    def upper(self):
+        flr = self.flr + 1
+        if flr == self.size:
+            return None
+        return self.floors[flr]
+
+    def grouped(self, flr=None):
+        gens, chips = self.floor(flr)
+        return (gens, [el for el in gens if el in chips], chips)
+
+    def elevator_canditates(self):
+        gens, pairs, chips = self.grouped()
+        yield from ((list(g), []) for g in combinations(gens, 2))
+        if pairs:
+            yield (pairs[:1], pairs[:1])
+        yield from (([], list(c)) for c in combinations(chips, 2))
+        yield from (([g], []) for g in gens)
+        yield from (([], [c]) for c in chips)
+
+    def move(self, dir, elevator):
+        # print("MOVEing", dir, elevator)
+        gens_from, chips_from = self.floors[self.flr]
+        self.flr += dir
+        gens_to, chips_to = self.floors[self.flr]
+        gens_x, chips_x = elevator
+        for gen in gens_x:
+            gens_from.remove(gen)
+            gens_to.append(gen)
+        for chip in chips_x:
+            chips_from.remove(chip)
+            chips_to.append(chip)
+        gens_to.sort()
+        chips_to.sort()
         self.count += 1
-        self.flr = dest
-        self.display()
-        self.is_valid()
+
+    @staticmethod
+    def is_valid_floor(floor):
+        gens, chips = floor
+        rslt = not (gens and chips and any(chip for chip in chips if not chip in gens))
+        # print("Valid? ", gens, chips, rslt)
+        return rslt
+
+    @staticmethod
+    def floor_is_valid_with(floor, elev):
+        gens, chips = floor
+        x_gens, x_chips = elev
+        return Facility.is_valid_floor((gens + x_gens, chips + x_chips))
+
+    @staticmethod
+    def floor_is_valid_without(floor, elev):
+        gens, chips = floor
+        x_gens, x_chips = elev
+        return Facility.is_valid_floor(
+            (
+                [g for g in gens if g not in x_gens],
+                [c for c in chips if c not in x_chips],
+            )
+        )
 
 
-def isolate_chips_on_1st(facility):
-    # assumes lift on 1st, leaves it on 2nd
-    match facility.by_matched():
-        case ([], [pair], []):
-            facility.move(U, [pair], [pair])
-            return pair
+def movin_on_up(facility: Facility, state: State):
+    sig = facility.signature()
+    if state.known.get(sig, 10**18) <= facility.count:
+        return
+
+    if facility.count > 40:
+        return
+
+    state.known[sig] = facility.count
+
+    if facility.done():
+        yield facility.count
+        return
+
+    candidates = list(facility.elevator_canditates())
+    allow_leave = [
+        cand
+        for cand in candidates
+        if facility.floor_is_valid_without(facility.floor(), cand)
+    ]
+    upper = facility.upper()
+    lower = facility.lower()
+    allow_up = (
+        [
+            (UP, cand)
+            for cand in allow_leave
+            if facility.floor_is_valid_with(upper, cand)
+        ]
+        if upper
+        else []
+    )
+    allow_down = (
+        [
+            (DOWN, cand)
+            for cand in reversed(allow_leave)
+            if facility.floor_is_valid_with(lower, cand)
+        ]
+        if lower
+        else []
+    )
+    elevators = [
+        elev
+        for pair in zip_longest(allow_up, allow_down, fillvalue=None)
+        for elev in pair
+        if elev
+    ]
+    for dir, elev in elevators:
+        new_facility = facility.copy()
+        new_facility.move(dir, elev)
+        state.facility_count += 1
+        yield from movin_on_up(new_facility, state)
 
 
-def clear_most_from_3rd(f, chap):
-    # assumes lift on 2nd, leaves on 2nd
-    while True:
-        match f.by_matched(2):
-            case ([], [], [chip1, chip2]):
-                f.move(U, [chip1, chip2], [])
-                f.move(U, [chip1], [chip1])
-                f.move(D, [chip1], [])
-                f.move(U, [chip1, chip2], [])
-                f.move(D, [chip2], [])
-                f.move(D, [chip2], [])
-                exit()
-                f.move(D, [chap], [chap])
-                f.move(U, [chap], [])
-                return None, chip2
-            case ([], [], [chip, _, *_]):
-                f.move(U, [], [chap])
-                f.move(D, [], [chip, chap])
-            case _:
-                raise RuntimeError("oops")
+def part1(facility, args, p1_state):
+    state = State(40)
+    return min(movin_on_up(facility, state))
 
 
-def move_pairs_from_2nd_to_4th(facility, chap, leading_chip=None):
-    def move_pair(pair):
-        if not leading_chip:
-            facility.move(U, [pair], [pair])
-            facility.move(D, [pair], [])
-        facility.move(U, [chap, pair], [])
-        facility.move(U, [chap, pair], [])
-        facility.move(D, [pair], [])
-        facility.move(U, [pair], [pair])
-        facility.move(D, [chap], [])
-        facility.move(D, [chap], [])
-
-        
-    if leading_chip:
-        move_pair(leading_chip)   
-        leading_chip = None
-    _, pairs, _ = facility.by_matched()
-    for pair in pairs:
-        move_pair(pair)
-
-
-def end(facility, chap):
-    facility.move(D, [chap], [])
-    facility.move(U, [chap], [chap])
-    facility.move(U, [chap], [chap])
-    facility.move(U, [chap], [chap])
-
-
-def manual(facility):
-    ""
-
-
-def part1(f, args, p1_state):
-    f.display()
-
-    gens, pairs, chips = f.by_matched()
-    chap = pairs[0]
-    f.m(U, pairs, pairs)
-    
-    f.m(U, [], chap)
-    gens, pairs, chips = f.by_matched()
-    f.m(D, [], [chap, chips[0]])
-
-    f.m(U, [], chap)
-    f.m(U, [], [chap, chips[1]])
-    f.m(D, [], chap)
-    f.m(D, [], [chap, "Ru"])
-
-    f.m(U, ["Pl", "Cu"])
-    f.m(D, "Cu")
-    f.m(U, "Co", "Co")
-    f.m(U, [], ["Co", "Pl"])
-    f.m(D, [], "Pl")
-    f.m(D, "Pl", "Pl")
-    
-    f.m(U, "Cu")
-    f.m(U, ["Co", "Cu"])
-    f.m(D, "Cu", "Cu")
-    f.m(D, "Cu")
-    
-    f.m(U, [], ["Pr", "Ru"])
-    f.m(D, [], "Cu")
-    f.m(U, ["Pr", "Ru"])
-    f.m(U, ["Pr", "Ru"])
-    f.m(D, [], "Co")
-    f.m(U, [], ["Pr", "Ru"])
-    f.m(D, "Co")
-    f.m(D, "Co")
-
-    f.m(U, [], ["Pl", "Cu"])
-    f.m(D, [], "Co")
-
-    f.m(U, ["Pl", "Cu"])
-    f.m(U, ["Pl", "Cu"])
-    f.m(D, [], "Pr")
-    f.m(U, [], ["Pl", "Cu"])
-    f.m(D, [], "Ru")
-    f.m(U, [], ["Pr", "Ru"])
-    
-    exit()
-
-
-
-
-    
-    # chaperone = isolate_chips_on_1st(facility)
-    # rmn_gen, rmn_chip = clear_most_from_3rd(facility, chaperone)
-    # assert not rmn_gen
-    # move_pairs_from_2nd_to_4th(facility, chaperone, rmn_chip)
-    # end(facility, chaperone)
-    # return "ans1"
-    
-
-
-def part2(floors, args, p1_state):
+def part2(facility, args, p1_state):
     return "ans2"
 
 
