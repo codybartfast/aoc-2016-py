@@ -1,3 +1,16 @@
+#  Day 11
+#  ======
+#
+#  Part 1: 33
+#  Part 2: 57
+#
+#  Timings
+#  ---------------------
+#    Parse:     0.000098
+#   Part 1:    24.364271
+#   Part 2:  2606.802769
+#  Elapsed:  2631.167250
+
 from itertools import combinations, zip_longest
 import re
 
@@ -43,7 +56,6 @@ class Facility:
             for i, floor in enumerate(self.floors)
         ]
         lines.reverse()
-        # lines.append(f"count: {self.count}")
         return "\n".join(lines)
 
     def copy(self):
@@ -134,13 +146,14 @@ def movin_on_up(facility: Facility, state: State):
     if state.known.get(sig, 10**18) <= facility.count:
         return
 
-    if facility.count > 40:
+    if facility.count >= state.max_moves:
         return
 
     state.known[sig] = facility.count
 
     if facility.done():
         yield facility.count
+        state.max_moves = facility.count
         return
 
     candidates = list(facility.elevator_canditates())
@@ -188,7 +201,12 @@ def part1(facility, args, p1_state):
 
 
 def part2(facility, args, p1_state):
-    return "ans2"
+    gens, chips = facility.floor()
+    gens.extend(["El", "Di"])
+    chips.extend(["El", "Di"])
+
+    state = State(65)
+    return min(movin_on_up(facility, state))
 
 
 def jingle(filepath=None, text=None, extra_args=None):
