@@ -34,11 +34,11 @@ def run(prog, regs):
 
 
 def part1(data, args, p1_state):
-    return run(data, [0] * 5)[1]
+    return run(data, [0, 0, 0, 0, 0])[1]
 
 
 def part2(data, args, p1_state):
-    return "ans2"
+    return run(data, [0, 0, 0, 1, 0])[1]
 
 
 def jingle(filepath=None, text=None, extra_args=None):
