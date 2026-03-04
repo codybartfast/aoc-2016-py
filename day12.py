@@ -1,12 +1,28 @@
+#  Day 12
+#  ======
+#
+#  Part 1: 318007
+#  Part 2: 9227661
+#
+#  Timings
+#  ---------------------
+#    Parse:     0.000019
+#   Part 1:     0.072167
+#   Part 2:     1.859008
+#  Elapsed:     1.931301
+
 def parse(text):
+    instrs = ["cpy", "inc", "dec", "jnz"]
+    regs = ["pc", "a", "b", "c", "d"]
+
     def convert(val):
-        if val in ["a", "b", "c", "d"]:
-            return (1, ord(val) - 96)
+        if val in regs:
+            return (1, regs.index(val))
         return (0, int(val))
 
     def parse_line(line):
         parts = line.split()
-        return parts[0], tuple(map(convert, parts[1:]))
+        return instrs.index(parts[0]), tuple(map(convert, parts[1:]))
 
     return [parse_line(line) for line in text.splitlines()]
 
@@ -14,31 +30,33 @@ def parse(text):
 def run(prog, regs):
     while regs[0] < len(prog):
         instr, args = prog[regs[0]]
-        match instr, args:
-            case "cpy", ((t1, v1), (_, v2)):
-                regs[v2] = v1 if not t1 else regs[v1]
+        match instr:
+            case 0:
+                arg0, arg1 = args
+                regs[arg1[1]] = arg0[1] if not arg0[0] else regs[arg0[1]]
                 regs[0] += 1
-            case "inc", ((_, v1),):
-                regs[v1] += 1
+            case 1:
+                regs[args[0][1]] += 1
                 regs[0] += 1
-            case "dec", ((_, v1),):
-                regs[v1] -= 1
+            case 2:
+                regs[args[0][1]] -= 1
                 regs[0] += 1
-            case "jnz", ((t1, v1), (t2, v2)):
+            case 3:
+                arg0, arg1 = args
                 regs[0] += (
-                    (v2 if not t2 else regs[v2]) if (v1 if not t1 else regs[v1]) else 1
+                    (arg1[1] if not arg1[0] else regs[arg1[1]])
+                    if (arg0[1] if not arg0[0] else regs[arg0[1]])
+                    else 1
                 )
-            case _:
-                assert False, (instr, args)
     return regs
 
 
-def part1(data, args, p1_state):
-    return run(data, [0, 0, 0, 0, 0])[1]
+def part1(program, args, p1_state):
+    return run(program, [0, 0, 0, 0, 0])[1]
 
 
-def part2(data, args, p1_state):
-    return run(data, [0, 0, 0, 1, 0])[1]
+def part2(program, args, p1_state):
+    return run(program, [0, 0, 0, 1, 0])[1]
 
 
 def jingle(filepath=None, text=None, extra_args=None):
