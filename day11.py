@@ -6,16 +6,17 @@
 #
 #  Timings
 #  ---------------------
-#    Parse:     0.000098
-#   Part 1:    24.364271
-#   Part 2:  2606.802769
-#  Elapsed:  2631.167250
+#    Parse:     0.000096
+#   Part 1:     1.518925
+#   Part 2:     5.724690
+#  Elapsed:     7.243815
 
-from itertools import combinations, zip_longest
+from itertools import combinations, islice
 import re
 
-UP = +1
-DOWN = -1
+
+# Bigger number here slows search but reduces chance of missing answer
+MAX_FAC = 2**12
 
 
 def parse(text):
@@ -29,184 +30,111 @@ def parse(text):
         return floor
 
     floors = [parse_line(line) for line in (text.splitlines())]
-    return Facility(floors, 0, 0)
+    return (0, floors)
 
 
-class State:
-    def __init__(self, max_moves):
-        self.known = {}
-        self.facility_count = 0
-        self.max_moves = max_moves
-
-
-class Facility:
-    def __init__(self, floors, flr, count):
-        self.floors = floors
-        self.size = len(floors)
-        self.flr = flr
-        self.count = count
-
-    def display(self):
-        print(self.signature())
-        print(f"count: {self.count}")
-
-    def signature(self):
-        lines = [
-            f"{'E' if i == self.flr else ' '} {floor}"
-            for i, floor in enumerate(self.floors)
-        ]
-        lines.reverse()
-        return "\n".join(lines)
-
-    def copy(self):
-        n_floors = [(list(gens), list(chips)) for [gens, chips] in self.floors]
-        return Facility(n_floors, self.flr, self.count)
-
-    def done(self):
-        return not any(gens or chips for gens, chips in self.floors[:-1])
-
-    def is_valid(self):
-        for floor in self.floors:
-            if floor[1] and floor[0] and any(kind not in floor[0] for kind in floor[1]):
-                assert False  # Invalid State
-        return True
-
-    def floor(self, flr=None):
-        if flr is None:
-            flr = self.flr
-        return self.floors[flr]
-
-    def lower(self):
-        if self.flr == 0:
-            return None
-        return self.floors[self.flr - 1]
-
-    def upper(self):
-        flr = self.flr + 1
-        if flr == self.size:
-            return None
-        return self.floors[flr]
-
-    def grouped(self, flr=None):
-        gens, chips = self.floor(flr)
-        return (gens, [el for el in gens if el in chips], chips)
-
-    def elevator_canditates(self):
-        gens, pairs, chips = self.grouped()
-        yield from ((list(g), []) for g in combinations(gens, 2))
-        if pairs:
-            yield (pairs[:1], pairs[:1])
-        yield from (([], list(c)) for c in combinations(chips, 2))
-        yield from (([g], []) for g in gens)
-        yield from (([], [c]) for c in chips)
-
-    def move(self, dir, elevator):
-        # print("MOVEing", dir, elevator)
-        gens_from, chips_from = self.floors[self.flr]
-        self.flr += dir
-        gens_to, chips_to = self.floors[self.flr]
-        gens_x, chips_x = elevator
-        for gen in gens_x:
-            gens_from.remove(gen)
-            gens_to.append(gen)
-        for chip in chips_x:
-            chips_from.remove(chip)
-            chips_to.append(chip)
-        gens_to.sort()
-        chips_to.sort()
-        self.count += 1
-
-    @staticmethod
-    def is_valid_floor(floor):
-        gens, chips = floor
-        rslt = not (gens and chips and any(chip for chip in chips if not chip in gens))
-        # print("Valid? ", gens, chips, rslt)
-        return rslt
-
-    @staticmethod
-    def floor_is_valid_with(floor, elev):
-        gens, chips = floor
-        x_gens, x_chips = elev
-        return Facility.is_valid_floor((gens + x_gens, chips + x_chips))
-
-    @staticmethod
-    def floor_is_valid_without(floor, elev):
-        gens, chips = floor
-        x_gens, x_chips = elev
-        return Facility.is_valid_floor(
-            (
-                [g for g in gens if g not in x_gens],
-                [c for c in chips if c not in x_chips],
-            )
-        )
-
-
-def movin_on_up(facility: Facility, state: State):
-    sig = facility.signature()
-    if state.known.get(sig, 10**18) <= facility.count:
-        return
-
-    if facility.count >= state.max_moves:
-        return
-
-    state.known[sig] = facility.count
-
-    if facility.done():
-        yield facility.count
-        state.max_moves = facility.count
-        return
-
-    candidates = list(facility.elevator_canditates())
-    allow_leave = [
-        cand
-        for cand in candidates
-        if facility.floor_is_valid_without(facility.floor(), cand)
-    ]
-    upper = facility.upper()
-    lower = facility.lower()
-    allow_up = (
-        [
-            (UP, cand)
-            for cand in allow_leave
-            if facility.floor_is_valid_with(upper, cand)
-        ]
-        if upper
-        else []
+def signature(facility):
+    e, floors = facility
+    return e, tuple(
+        (tuple(sorted(floor[0])), tuple(sorted(floor[1]))) for floor in floors
     )
-    allow_down = (
-        [
-            (DOWN, cand)
-            for cand in reversed(allow_leave)
-            if facility.floor_is_valid_with(lower, cand)
-        ]
-        if lower
-        else []
+
+
+def is_valid(facility):
+    for floor in facility[1]:
+        if floor[0] and floor[1] and any(elm not in floor[0] for elm in floor[1]):
+            return False
+    return True
+
+
+def is_done(facility):
+    e, floors = facility
+    return (e == len(floors) - 1) and not any(
+        gens or chips for gens, chips in floors[:-1]
     )
-    elevators = [
-        elev
-        for pair in zip_longest(allow_up, allow_down, fillvalue=None)
-        for elev in pair
-        if elev
-    ]
-    for dir, elev in elevators:
-        new_facility = facility.copy()
-        new_facility.move(dir, elev)
-        state.facility_count += 1
-        yield from movin_on_up(new_facility, state)
+
+
+def score(facility):
+    scr = 0
+    for i, (gens, chips) in enumerate(facility[1]):
+        scr += (i + 1) * sum(1 for elm in gens if elm in chips)
+    return scr
+
+
+def loads(facility):
+    e, floors = facility
+    gens, chips = floors[e]
+    pairs = [elm for elm in gens if elm in chips]
+    yield from ((list(g), []) for g in combinations(gens, 2))
+    if pairs:
+        yield (pairs[:1], pairs[:1])
+    yield from (([], list(c)) for c in combinations(chips, 2))
+    yield from (([g], []) for g in gens)
+    yield from (([], [c]) for c in chips)
+
+
+def move(old_floors, load, _from, _to):
+    floors = [(list(gens), list(chips)) for [gens, chips] in old_floors]
+    f_gens, f_chips = floors[_from]
+    x_gens, x_chips = load
+    t_gens, t_chips = floors[_to]
+    for gen in x_gens:
+        f_gens.remove(gen)
+        t_gens.append(gen)
+    for chip in x_chips:
+        f_chips.remove(chip)
+        t_chips.append(chip)
+    return (_to, floors)
+
+
+def next_facilities(facility):
+    e, floors = facility
+    if e < len(floors) - 1:
+        yield from (move(floors, load, e, e + 1) for load in loads(facility))
+    if e > 0:
+        yield from (move(floors, load, e, e - 1) for load in loads(facility))
+
+
+def next_generation(facilities, known: set):
+    for facility in facilities:
+        for next in next_facilities(facility):
+            if is_valid(next) and (sgn := signature(next)) not in known:
+                known.add(sgn)
+                yield next
+
+
+def dup_head(iter):
+    head = next(iter)
+    yield head
+    yield head
+    yield from iter
+
+
+def search(facility):
+    facilities = [facility]
+    count = 0
+    known = set()
+    while True:
+        count += 1
+        facilities = next_generation(facilities, known)
+        facilities = sorted(facilities, key=score, reverse=True)
+        facilities = islice(facilities, MAX_FAC)
+        dup_headed = dup_head(facilities)
+        head = next(dup_headed)
+        if is_done(head):
+            return count
+        facilities = dup_headed
 
 
 def part1(facility, args, p1_state):
-    state = State(40)
-    return min(movin_on_up(facility, state))
+    return search(facility)
 
 
 def part2(facility, args, p1_state):
-    gens, chips = facility.floor()
-    gens.extend(["El", "Di"])
-    chips.extend(["El", "Di"])
-
-    state = State(65)
-    return min(movin_on_up(facility, state))
+    gens, chips = facility[1][0]
+    gens.extend(["Di", "El"])
+    chips.extend(["Di", "El"])
+    return search(facility)
 
 
 def jingle(filepath=None, text=None, extra_args=None):
