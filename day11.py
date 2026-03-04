@@ -36,7 +36,7 @@ def parse(text):
 def signature(facility):
     e, floors = facility
     return e, tuple(
-        (tuple(sorted(floor[0])), tuple(sorted(floor[1]))) for floor in floors
+        (tuple(sorted(gens)), tuple(sorted(chips))) for gens, chips in floors
     )
 
 
@@ -55,44 +55,47 @@ def is_done(facility):
 
 
 def score(facility):
-    scr = 0
-    for i, (gens, chips) in enumerate(facility[1]):
-        scr += (i + 1) * sum(1 for elm in gens if elm in chips)
-    return scr
+    return sum(
+        (i + 1) * sum(1 for elm in gens if elm in chips)
+        for i, (gens, chips) in enumerate(facility[1])
+    )
 
 
-def loads(facility):
+def elevator_loads(facility):
+    lds = []
     e, floors = facility
     gens, chips = floors[e]
     pairs = [elm for elm in gens if elm in chips]
-    yield from ((list(g), []) for g in combinations(gens, 2))
+    lds.extend((list(g), []) for g in combinations(gens, 2))
     if pairs:
-        yield (pairs[:1], pairs[:1])
-    yield from (([], list(c)) for c in combinations(chips, 2))
-    yield from (([g], []) for g in gens)
-    yield from (([], [c]) for c in chips)
+        lds.extend([[pairs[:1], pairs[:1]]])
+    lds.extend(([], list(c)) for c in combinations(chips, 2))
+    lds.extend(([g], []) for g in gens)
+    lds.extend(([], [c]) for c in chips)
+    return lds
 
 
 def move(old_floors, load, _from, _to):
     floors = [(list(gens), list(chips)) for [gens, chips] in old_floors]
-    f_gens, f_chips = floors[_from]
-    x_gens, x_chips = load
-    t_gens, t_chips = floors[_to]
-    for gen in x_gens:
-        f_gens.remove(gen)
-        t_gens.append(gen)
-    for chip in x_chips:
-        f_chips.remove(chip)
-        t_chips.append(chip)
+    ld_gens, ld_chips = load
+    fr_gens, fr_chips = floors[_from]
+    to_gens, to_chips = floors[_to]
+    for gen in ld_gens:
+        fr_gens.remove(gen)
+        to_gens.append(gen)
+    for chip in ld_chips:
+        fr_chips.remove(chip)
+        to_chips.append(chip)
     return (_to, floors)
 
 
 def next_facilities(facility):
     e, floors = facility
+    loads = elevator_loads(facility)
     if e < len(floors) - 1:
-        yield from (move(floors, load, e, e + 1) for load in loads(facility))
+        yield from (move(floors, load, e, e + 1) for load in loads)
     if e > 0:
-        yield from (move(floors, load, e, e - 1) for load in loads(facility))
+        yield from (move(floors, load, e, e - 1) for load in loads)
 
 
 def next_generation(facilities, known: set):
@@ -103,7 +106,7 @@ def next_generation(facilities, known: set):
                 yield next
 
 
-def dup_head(iter):
+def double_head(iter):
     head = next(iter)
     yield head
     yield head
@@ -119,11 +122,11 @@ def search(facility):
         facilities = next_generation(facilities, known)
         facilities = sorted(facilities, key=score, reverse=True)
         facilities = islice(facilities, MAX_FAC)
-        dup_headed = dup_head(facilities)
-        head = next(dup_headed)
+        dub_headed = double_head(facilities)
+        head = next(dub_headed)
+        facilities = dub_headed
         if is_done(head):
             return count
-        facilities = dup_headed
 
 
 def part1(facility, args, p1_state):
