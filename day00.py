@@ -1,6 +1,7 @@
 def parse(text):
     def parse_line(line):
-        return [part for part in line.split()]
+        parts = line.split()
+        return [part for part in parts]
 
     return [parse_line(line) for line in text.splitlines()]
 

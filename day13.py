@@ -1,3 +1,16 @@
+#  Day 13
+#  ======
+#
+#  Part 1: 96
+#  Part 2: 141
+#
+#  Timings
+#  ---------------------
+#    Parse:     0.000001
+#   Part 1:     0.000239
+#   Part 2:     0.000098
+#  Elapsed:     0.000378
+
 def parse(text):
     return int(text)
 
@@ -11,11 +24,11 @@ def is_open(coord, fav):
     )
 
 
-def explore(end: tuple[int, int], fav: int, max_steps=10**18):
+def explore(end, fav, max_steps=10**18):
     cubs = [(1, 1)]
     done = set(cubs)
+    open_count = len(cubs)
     steps = 0
-    open_count = 1
     while steps < max_steps:
         next_cubs = []
         for cub in cubs:
@@ -34,12 +47,7 @@ def explore(end: tuple[int, int], fav: int, max_steps=10**18):
 
 
 def part1(fav, args, p1_state):
-    coords = args[1:]
-    if coords:
-        start = tuple(map(int, coords))
-    else:
-        start = 31, 39
-    return explore(start, fav)
+    return explore((31, 39), fav)
 
 
 def part2(fav, args, p1_state):
