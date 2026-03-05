@@ -1,3 +1,16 @@
+#  Day 14
+#  ======
+#
+#  Part 1: 25427
+#  Part 2: 22045
+#
+#  Timings
+#  ---------------------
+#    Parse:     0.000001
+#   Part 1:     0.024795
+#   Part 2:    12.927354
+#  Elapsed:    12.952210
+
 from hashlib import md5
 import re
 
@@ -6,8 +19,8 @@ def parse(text):
     return text.encode()
 
 
-def digests(prefix, stretch=False):
-    index = -1
+def digests(prefix, stretch):
+    index = 0
     prefix_hash = md5(prefix)
     bs = bytearray([0x2F])
     last_idx = 0
@@ -30,19 +43,18 @@ def digests(prefix, stretch=False):
         if stretch:
             for _ in range(2016):
                 hash = md5(hash.hexdigest().encode())
-        index += 1
         yield (index, hash.hexdigest())
+        index += 1
 
 
-def otps(salt, stretch=False):
+def otps(salt, stretch):
     trip_re = re.compile(r"(.)\1\1")
     quint_re = re.compile(r"(.)\1\1\1\1")
 
     candidates = {}
     for index, digest in digests(salt, stretch):
         if m := quint_re.search(digest):
-            val = m.group(1)
-            cands = candidates[val]
+            cands = candidates[m.group(1)]
             lim = index - 1000
             for cand in cands:
                 if cand >= lim:
@@ -53,22 +65,21 @@ def otps(salt, stretch=False):
             candidates.setdefault(m.group(1), []).append(index)
 
 
-def part1(salt, args, p1_state):
-    otp_iter = otps(salt)
-    indexes = sorted([next(otp_iter) for _ in range(64)])
+def find_index(salt, key_num, stretch = False):
+    otp_iter = otps(salt, stretch)
+    indexes = sorted([next(otp_iter) for _ in range(key_num)])
     safe_limit = indexes[-1] + 1000
     while (index := next(otp_iter)) <= safe_limit:
         indexes.append(index)
-    return sorted(indexes)[63]
+    return sorted(indexes)[key_num - 1]
+
+
+def part1(salt, args, p1_state):
+    return find_index(salt, 64)
 
 
 def part2(salt, args, p1_state):
-    otp_iter = otps(salt, True)
-    indexes = sorted([next(otp_iter) for _ in range(64)])
-    safe_limit = indexes[-1] + 1000
-    while (index := next(otp_iter)) <= safe_limit:
-        indexes.append(index)
-    return sorted(indexes)[63]
+    return find_index(salt, 64, True)
 
 
 def jingle(filepath=None, text=None, extra_args=None):
