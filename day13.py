@@ -7,17 +7,17 @@ def is_open(coord, fav):
     return (
         x >= 0
         and y >= 0
-        and ((x * x + 3 * x + 2 * x * y + y + y * y + fav).bit_count() % 2) == 0
+        and (x * x + 3 * x + 2 * x * y + y + y * y + fav).bit_count() % 2 == 0
     )
 
 
-def explore(end: tuple[int, int], fav: int):
-    done = set()
+def explore(end: tuple[int, int], fav: int, max_steps=10**18):
     cubs = [(1, 1)]
-    steps = -1
-    while True:
-        steps += 1
-        nxt_cubs = []
+    done = set(cubs)
+    steps = 0
+    open_count = 1
+    while steps < max_steps:
+        next_cubs = []
         for cub in cubs:
             if cub == end:
                 return steps
@@ -25,21 +25,12 @@ def explore(end: tuple[int, int], fav: int):
             for n in [(x, y - 1), (x + 1, y), (x, y + 1), (x - 1, y)]:
                 if n not in done:
                     done.add(n)
-                    nx, ny = n
-                    if (
-                        x >= 0
-                        and y >= 0
-                        and (
-                            (
-                                nx * nx + 3 * nx + 2 * nx * ny + ny + ny * ny + fav
-                            ).bit_count()
-                            % 2
-                        )
-                        == 0
-                    ):
-                        nxt_cubs.append(n)
-        # input((cubs, nxt_cubs))
-        cubs = nxt_cubs
+                    if is_open(n, fav):
+                        next_cubs.append(n)
+        open_count += len(next_cubs)
+        cubs = next_cubs
+        steps += 1
+    return open_count
 
 
 def part1(fav, args, p1_state):
@@ -52,7 +43,7 @@ def part1(fav, args, p1_state):
 
 
 def part2(fav, args, p1_state):
-    return "ans2"
+    return explore((31, 39), fav, 50)
 
 
 def jingle(filepath=None, text=None, extra_args=None):
