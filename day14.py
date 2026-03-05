@@ -6,7 +6,7 @@ def parse(text):
     return text.encode()
 
 
-def digests(prefix):
+def digests(prefix, stretch=False):
     index = -1
     prefix_hash = md5(prefix)
     bs = bytearray([0x2F])
@@ -27,16 +27,19 @@ def digests(prefix):
                 idx = last_idx
         hash = prefix_hash.copy()
         hash.update(bs)
+        if stretch:
+            for _ in range(2016):
+                hash = md5(hash.hexdigest().encode())
         index += 1
         yield (index, hash.hexdigest())
 
 
-def otps(salt):
+def otps(salt, stretch=False):
     trip_re = re.compile(r"(.)\1\1")
     quint_re = re.compile(r"(.)\1\1\1\1")
 
     candidates = {}
-    for index, digest in digests(salt):
+    for index, digest in digests(salt, stretch):
         if m := quint_re.search(digest):
             val = m.group(1)
             cands = candidates[val]
@@ -56,13 +59,16 @@ def part1(salt, args, p1_state):
     safe_limit = indexes[-1] + 1000
     while (index := next(otp_iter)) <= safe_limit:
         indexes.append(index)
-    # print(len(indexes))
-    # print(sorted(indexes)[:64])
     return sorted(indexes)[63]
 
 
-def part2(data, args, p1_state):
-    return "ans2"
+def part2(salt, args, p1_state):
+    otp_iter = otps(salt, True)
+    indexes = sorted([next(otp_iter) for _ in range(64)])
+    safe_limit = indexes[-1] + 1000
+    while (index := next(otp_iter)) <= safe_limit:
+        indexes.append(index)
+    return sorted(indexes)[63]
 
 
 def jingle(filepath=None, text=None, extra_args=None):
