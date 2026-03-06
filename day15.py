@@ -1,3 +1,16 @@
+#  Day 15
+#  ======
+#
+#  Part 1: 122318
+#  Part 2: 3208583
+#
+#  Timings
+#  ---------------------
+#    Parse:     0.000008
+#   Part 1:     0.000005
+#   Part 2:     0.000003
+#  Elapsed:     0.000055
+
 def parse(text):
     def parse_line(line):
         parts = line.split()
@@ -19,12 +32,11 @@ def find_start(discs):
         
 
 def part1(discs, args, p1_state):
-    print(f"{discs}\n\n")
     return find_start(discs)
 
 
-def part2(data, args, p1_state):
-    return "ans2"
+def part2(discs, args, p1_state):
+    return find_start(discs + [(11,0)])
 
 
 def jingle(filepath=None, text=None, extra_args=None):
