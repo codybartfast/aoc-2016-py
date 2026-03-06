@@ -7,16 +7,17 @@
 #  Timings
 #  ---------------------
 #    Parse:     0.000008
-#   Part 1:     0.000005
+#   Part 1:     0.000006
 #   Part 2:     0.000003
-#  Elapsed:     0.000055
+#  Elapsed:     0.000053
+
 
 def parse(text):
-    def parse_line(line):
-        parts = line.split()
-        return (int(parts[3]), int(parts[-1][:-1]))
+    return [
+        (int(parts[3]), int(parts[-1][:-1]))
+        for parts in [line.split() for line in text.splitlines()]
+    ]
 
-    return [parse_line(line) for line in text.splitlines()]
 
 def find_start(discs):
     time = 0
@@ -29,14 +30,15 @@ def find_start(discs):
             slot = (slot + period) % size
         period *= size
     return time - len(discs)
-        
+
 
 def part1(discs, args, p1_state):
     return find_start(discs)
 
 
 def part2(discs, args, p1_state):
-    return find_start(discs + [(11,0)])
+    discs.append((11, 0))
+    return find_start(discs)
 
 
 def jingle(filepath=None, text=None, extra_args=None):

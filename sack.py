@@ -4,6 +4,10 @@ import sys
 
 YEAR = "2016"
 
+# pot mods:
+#   - template - could make jingle singature (text, filepath, args) because
+#     keeps filepath and args togeather and more closely reflects logic: if get
+#     text then don't look at filepath
 
 def get_day():
     filename = Path(sys._getframe(2).f_code.co_filename).name
