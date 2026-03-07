@@ -1,62 +1,43 @@
-from itertools import islice
+#  Day 16
+#  ======
+#
+#  Part 1: 10100011010101011
+#  Part 2: 01010001101011001
+#
+#  Timings
+#  ---------------------
+#    Parse:     0.000002
+#   Part 1:     0.000041
+#   Part 2:     1.446278
+#  Elapsed:     1.44638
 
 
 def parse(text):
-    a = 0
-    for char in text:
-        a <<= 1
-        if char == "1":
-            a |= 1
-    return a, len(text)
+    return [char == "1" for char in text]
 
 
-def dragon(a, n_a, n_target):
-    while n_a < n_target:
-        t = a
-        a <<= 1
-        for _ in range(n_a):
-            a <<= 1
-            a |= not (t & 1)
-            t >>= 1
-        n_a = n_a * 2 + 1
-    a >>= n_a - n_target
+def format(a):
+    return "".join("1" if x else "0" for x in a)
+
+
+def dragon(a, length):
+    while len(a) < length:
+        a = [*a, False, *(not x for x in reversed(a))]
+    return a[:length]
+
+
+def checksum(a):
+    while len(a) % 2 == 0:
+        a = [a[i] == a[i + 1] for i in range(0, len(a), 2)]
     return a
 
 
-def checksum(a, n_a):
-    def round(a, n):
-        chk = 0
-        while n:
-            chk <<= 1
-            chk |= 1 if (a & 0b11 == 0b11 or a & 0b11 == 0b00) else 0
-            a >>= 2
-            n -= 1
-        return chk
-
-    is_reversed = False
-    while n_a % 2 == 0:
-        is_reversed = not is_reversed
-        n_a //= 2
-        a = round(a, n_a)
-
-    if is_reversed:
-        t = a
-        a = 0
-        for _ in range(n_a):
-            a <<= 1
-            a |= t & 1
-            t >>= 1
-    return f"{a:0{n_a}b}"
-
-
 def part1(data, args, p1_state):
-    a, n_a = data
-    expanded = 272
-    return checksum(dragon(a, n_a, expanded), expanded)
+    return format(checksum(dragon(data, 272)))
 
 
 def part2(data, args, p1_state):
-    return "ans2"
+    return format(checksum(dragon(data, 35651584)))
 
 
 def jingle(filepath=None, text=None, extra_args=None):
