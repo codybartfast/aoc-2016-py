@@ -1,9 +1,19 @@
+#  2016 Day 18
+#  ===========
+#
+#  Part 1: 1987
+#  Part 2: 19984714
+#
+#  Timings
+#  ---------------------
+#    Parse:     0.000005
+#   Part 1:     0.000138
+#   Part 2:     0.956325
+#  Elapsed:     0.956526
+
+
 def parse(text):
     return [False, *[char == "^" for char in text], False]
-
-
-def format(row):
-    return "".join("^" if b else "." for b in row[0:])
 
 
 def next(row):
@@ -11,20 +21,19 @@ def next(row):
 
 
 def part1(row, args, p1_state):
-    total = 0
+    safe = 0
     for _ in range(40):
-        total += len(row) - sum(row) - 2
+        safe += len(row) - 2 - sum(row)
         row = next(row)
-    return total
+    return safe
 
 
 def part2(row, args, p1_state):
-    total = 0
+    safe = 0
     for _ in range(400_000):
-        # print(format(row))
-        total += len(row) - sum(row) - 2
+        safe += len(row) - 2 - sum(row)
         row = next(row)
-    return total
+    return safe
 
 
 def jingle(filepath=None, text=None, extra_args=None):
