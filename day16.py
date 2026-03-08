@@ -7,9 +7,9 @@
 #  Timings
 #  ---------------------
 #    Parse:     0.000002
-#   Part 1:     0.000041
-#   Part 2:     1.446278
-#  Elapsed:     1.44638
+#   Part 1:     0.000029
+#   Part 2:     1.237634
+#  Elapsed:     1.237721
 
 
 def parse(text):
@@ -20,9 +20,9 @@ def format(a):
     return "".join("1" if x else "0" for x in a)
 
 
-def dragon(a, length):
+def random(a, length):
     while len(a) < length:
-        a = [*a, False, *(not x for x in reversed(a))]
+        a = [*a, False, *[not x for x in reversed(a)]]
     return a[:length]
 
 
@@ -33,11 +33,11 @@ def checksum(a):
 
 
 def part1(data, args, p1_state):
-    return format(checksum(dragon(data, 272)))
+    return format(checksum(random(data, 272)))
 
 
 def part2(data, args, p1_state):
-    return format(checksum(dragon(data, 35651584)))
+    return format(checksum(random(data, 35651584)))
 
 
 def jingle(filepath=None, text=None, extra_args=None):
