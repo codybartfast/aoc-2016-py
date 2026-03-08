@@ -56,7 +56,7 @@ def present(text, extra_args, parse, part1, part2):
     pc_start = time.perf_counter()
     day = get_day()
 
-    title = f"Day {day}"
+    title = f"{YEAR} Day {day}"
 
     print("\n")
     h_print(title)
