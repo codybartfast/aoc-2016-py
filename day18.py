@@ -3,7 +3,7 @@ def parse(text):
 
 
 def format(row):
-    return "".join("^" if b else "." for b in row[1:-1])
+    return "".join("^" if b else "." for b in row[0:])
 
 
 def next(row):
@@ -18,8 +18,13 @@ def part1(row, args, p1_state):
     return total
 
 
-def part2(data, args, p1_state):
-    return "ans2"
+def part2(row, args, p1_state):
+    total = 0
+    for _ in range(400_000):
+        # print(format(row))
+        total += len(row) - sum(row) - 2
+        row = next(row)
+    return total
 
 
 def jingle(filepath=None, text=None, extra_args=None):
