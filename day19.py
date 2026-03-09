@@ -1,14 +1,20 @@
 def parse(text):
-    def parse_line(line):
-        parts = line.split()
-        return [part for part in parts]
+    return int(text)
 
-    return [parse_line(line) for line in text.splitlines()]
+def part1(size, args, p1_state):
+    print(f"\n{size}\n")
+    circle = [[i - 1, i + 1] for i in range(size)]
+    circle[0][0] = size - 1
+    circle[-1][1] = 0
 
-
-def part1(data, args, p1_state):
-    print(f"\n{data}\n")
-    return "ans1"
+    i = 0
+    elf = circle[i]
+    while elf[0] != i:
+        next = circle[elf[1]]    
+        circle[next[1]][0] = i
+        elf[1] = (i := next[1])
+        elf = next
+    return i + 1
 
 
 def part2(data, args, p1_state):
