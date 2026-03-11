@@ -99,12 +99,12 @@ def part2_tree(size):
 
 
 def part1(size, args, p1_state):
-    return part1_next_array(size)
+    return part1_linked_list(size)
 
 
 def part2(size, args, p1_state):
     # return
-    return part2_next_array(size)
+    return part2_linked_list(size)
 
 
 
@@ -142,25 +142,23 @@ def part1_next_array(size):
 
 
 def part2_next_array(size):
-    circle = [[i - 1, i + 1] for i in range(size)]
-    circle[0][0] = size - 1
-    circle[-1][1] = 0
+    circle = [i + 1 for i in range(size)]
+    circle[-1] = 0
 
-    player_id = 0
-    player = circle[player_id]
-    remaining = size
+    player = 0
+    remaining = size 
     while remaining > 1:
-        target_id = player_id
-        for _ in range(remaining // 2):
-            target_id = circle[target_id][1]
+        before_target = player
+        for _ in range((remaining // 2) - 1):
+            before_target = circle[before_target]
+        target = circle[before_target]
+        after_target = circle[target]
+        circle[before_target] = after_target
 
-        target = circle[target_id]
         # print(player_id, "  removing:", target_id)
-        circle[target[1]][0] = target[0]
-        circle[target[0]][1] = target[1]
-        player = circle[player_id := player[1]]
+        player = circle[player]
         remaining -= 1
-    return player_id + 1
+    return player + 1
 
 
 # Shrinking List
@@ -213,11 +211,10 @@ def part2_pop(size):
 
 
 class Elf:
-    __slots__ = ("elf", "prev", "next")
+    __slots__ = ("elf", "next")
 
-    def __init__(self, elf, prev):
+    def __init__(self, elf):
         self.elf = elf
-        self.prev = prev
         self.next = None
 
     def __repr__(self):
@@ -226,51 +223,46 @@ class Elf:
 
 #   Part 1:     0.432310
 
-def part1_double_ll(size):
-    first = Elf(1, None)
+def part1_linked_list(size):
+    first = Elf(1)
     prev = first
     for elf_id in range(2, size + 1):
-        new_elf = Elf(elf_id, prev)
+        new_elf = Elf(elf_id)
         prev.next = new_elf
         prev = new_elf
-    first.prev = prev
     prev.next = first
 
     player = first
     while player.next != player:
         target = player.next
         # print(player.elf, "  Removing:", target.elf)
-        new_next = target.next
-        player.next = new_next
-        new_next.prev = player
-        player = new_next
+        player.next = target.next
+        player = player.next
+        
     return player.elf
 
 
 #   Part 2: 35492.440158 (9.86 hours)
 #
-def part2_double_ll(size):
-    first = Elf(1, None)
+def part2_linked_list(size):
+    first = Elf(1)
     prev = first
     for elf_id in range(2, size + 1):
-        new_elf = Elf(elf_id, prev)
+        new_elf = Elf(elf_id)
         prev.next = new_elf
         prev = new_elf
-    first.prev = prev
     prev.next = first
 
     player = first
     while size > 1:
-        target = player
-        dist = size // 2
-        while dist:
-            target = target.next
-            dist -= 1
+        before_target = player
+        dist = (size // 2) - 1
+        for _ in range(dist):
+            before_target = before_target.next
         # print(player.elf, "  Removing:", target.elf)
-        targ_prev = target.prev
-        targ_next = target.next
-        targ_prev.next = targ_next
-        targ_next.prev = targ_prev
+        target = before_target.next
+        after_target = target.next
+        before_target.next = after_target
         player = player.next
         size -= 1
     return player.elf
