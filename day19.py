@@ -99,12 +99,12 @@ def part2_tree(size):
 
 
 def part1(size, args, p1_state):
-    return part1_linked_array(size)
+    return part1_next_array(size)
 
 
 def part2(size, args, p1_state):
     # return
-    return part2_linked_array(size)
+    return part2_next_array(size)
 
 
 
@@ -118,23 +118,19 @@ def part2(size, args, p1_state):
 #   Part 1:     0.527072
 
 
-def part1_linked_array(size):
-    circle = [[i - 1, i + 1] for i in range(size)]
-    circle[0][0] = size - 1
-    circle[-1][1] = 0
+def part1_next_array(size):
+    circle = [i + 1 for i in range(size)]
+    circle[-1] = 0
 
-    player_id = 0
-    player = circle[player_id]
+    player = 0
     size -= 1
     while size:
-        next = circle[player[1]]    
-        nn = circle[next[1]]
-        nn[0] = player_id
-        player[1] = (player_id := next[1])
+        next = circle[player]    
+        nn = circle[next]
+        circle[player] = nn
         player = nn
         size -= 1
-
-    return player_id + 1
+    return player + 1
 
 
 #   Part 2: 55013.937808 (15.28 hours)
@@ -145,7 +141,7 @@ def part1_linked_array(size):
 #   other listy solutions to see where the perf was being lost.
 
 
-def part2_linked_array(size):
+def part2_next_array(size):
     circle = [[i - 1, i + 1] for i in range(size)]
     circle[0][0] = size - 1
     circle[-1][1] = 0
