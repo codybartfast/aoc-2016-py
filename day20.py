@@ -34,11 +34,14 @@ def part1(excluded, args, p1_state):
         else:
             exl_idx += 1
 
+    p1_state.value = allowed
+
     return allowed[0][0]
 
 
-def part2(data, args, p1_state):
-    return "ans2"
+def part2(excluded, args, p1_state):
+    allowed = p1_state.value
+    return sum([end + 1 - start for start, end in allowed])
 
 
 def jingle(filepath=None, text=None, extra_args=None):
