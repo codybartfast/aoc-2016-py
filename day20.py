@@ -1,3 +1,17 @@
+#  2016 Day 20
+#  ===========
+#
+#  Part 1: 31053880
+#  Part 2: 117
+#
+#  Timings
+#  ---------------------
+#    Parse:     0.000203
+#   Part 1:     0.000285
+#   Part 2:     0.000007
+#  Elapsed:     0.000537
+
+
 def parse(text):
     def parse_line(line):
         parts = line.split("-")
@@ -8,15 +22,10 @@ def parse(text):
 
 def part1(excluded, args, p1_state):
     excluded.sort()
-
     allowed = [(0, 2**32 - 1)]
 
     alw_idx = 0
-    alw_start, alw_end = allowed[alw_idx]
-
     exl_idx = 0
-    exl_start, exl_end = excluded[exl_idx]
-
     while alw_idx < len(allowed) and exl_idx < len(excluded):
         alw_start, alw_end = allowed[alw_idx]
         exl_start, exl_end = excluded[exl_idx]
