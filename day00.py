@@ -29,5 +29,5 @@ if __name__ == "__main__":
     file = sys.argv[1] if len(sys.argv) > 1 else None
     filepath = sack.get_filepath(file)
     if filepath:
-        extra_args = sys.argv[1:] if len(sys.argv) > 1 else []
+        extra_args = sys.argv[2:] if len(sys.argv) > 2 else []
         jingle(filepath=filepath, extra_args=extra_args)
