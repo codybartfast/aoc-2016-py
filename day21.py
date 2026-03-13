@@ -22,7 +22,12 @@ def parse(text):
     return [parse_line(line) for line in text.splitlines()]
 
 
+def based_on(size):
+    return [((1 + x + x + (x >= 4)) % size) for x in range(size)]
+
+
 def apply(operations, word):
+    words=[word[:]]
     for op in operations:
         match op:
             case "swap_pstn", x, y:
@@ -40,6 +45,7 @@ def apply(operations, word):
             case "rot_on_ltr_pstn", a:
                 x = word.index(a)
                 n = -((1 + x + (x >= 4)) % len(word))
+                # print(n, based_on(len(word))[x])
                 word = word[n:] + word[:n]
             case "reverse", x, y:
                 assert x < y
@@ -49,18 +55,104 @@ def apply(operations, word):
                 word.insert(y, a)
             case _:
                 assert False, op
-        print("".join(word), op, "\n")
+        words.append(word[:])
+    return words
+
+
+def unapply(operations, word, based_on_map):
+    for op in operations:
+        match op:
+            case "swap_pstn", x, y:
+                # unchanged
+                t = word[x]
+                word[x] = word[y]
+                word[y] = t
+            case "swap_ltr", a, b:
+                # unchanged
+                x = word.index(a)
+                y = word.index(b)
+                t = word[x]
+                word[x] = word[y]
+                word[y] = t
+            case "rotate", n:
+                n = -n  #
+                word = word[n:] + word[:n]
+            case "rot_on_ltr_pstn", a:
+                x = word.index(a)
+                orig_x = based_on_map.index(x)
+                n = (x - orig_x) % len(word)
+                word = word[n:] + word[:n]
+
+                # n = -((1 + x + (x >= 4)) % len(word))
+                # word = word[n:] + word[:n]
+            case "reverse", x, y:
+                x, y = (x, y) if x < y else (y, x)  #
+                word[x : y + 1] = word[x : y + 1][::-1]
+            case "move", x, y:
+                # unchanged
+                a = word.pop(x)
+                word.insert(y, a)
+            case _:
+                assert False, op
+        # print("".join(word), op, "\n")
     return word
 
 
 def part1(operations, args, p1_state):
     word = list("abcdefgh")
-    # word = list("abcde")
-    return "".join(apply(operations, word))
+    words = apply(operations, word)
+    return "".join(words[-1])
 
 
-def part2(data, args, p1_state):
-    return "ans2"
+def part2(operations, args, p1_state):
+    word = list("fbgdceah")
+    # word = list("abcdefgh")
+    # fwd_words = apply(operations, word)
+    # last_word = fwd_words[-1]
+    # print(last_word)
+    # word = last_word
+
+    based_on_destinations = based_on(len(word))
+    assert len(based_on_destinations) == len(set(based_on_destinations))
+    
+    while operations:
+        # assert word == fwd_words.pop()
+        op = operations.pop()
+        # print(word, op, end=" => ")
+        match op:
+            case "swap_pstn", x, y:
+                # unchanged
+                t = word[x]
+                word[x] = word[y]
+                word[y] = t
+            case "swap_ltr", a, b:
+                # unchanged
+                x = word.index(a)
+                y = word.index(b)
+                t = word[x]
+                word[x] = word[y]
+                word[y] = t
+            case "rotate", n:
+                n = -n  #
+                word = word[n:] + word[:n]
+            case "rot_on_ltr_pstn", a:
+                x = word.index(a)
+                orig_x = based_on_destinations.index(x)
+                n = (x - orig_x) % len(word)
+                word = word[n:] + word[:n]
+
+                # n = -((1 + x + (x >= 4)) % len(word))
+                # word = word[n:] + word[:n]
+            case "reverse", x, y:
+                x, y = (x, y) if x < y else (y, x)  #
+                word[x : y + 1] = word[x : y + 1][::-1]
+            case "move", x, y:
+                a = word.pop(y)
+                word.insert(x, a)
+            case _:
+                assert False, op
+        # print(word, "expected", fwd_words[-1])         
+    return "".join(word)
 
 
 def jingle(filepath=None, text=None, extra_args=None):
