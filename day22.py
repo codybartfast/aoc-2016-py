@@ -1,3 +1,36 @@
+"""
+(.) .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  G
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  . [_] .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+"""
+
 import re
 
 
@@ -13,18 +46,35 @@ def parse(text):
     height = max(y for (_, y), _ in dfs) + 1
 
     return tuple(
-        (tuple((dfs[x * height + y][1] for x in range(width))) for y in range(height))
+        (tuple((dfs[x * height + y] for x in range(width))) for y in range(height))
     )
 
 
-def totals(disks):
-    total_used = sum(used for used, _ in disks)
-    total_avail = sum(avail for _, avail in disks)
-    return total_used, total_avail
+def render(disks):
+    h = len(disks)
+    w = len(disks[0])
+    max_x = w - 1
+
+    def render_disk(disk):
+        ((x, y), (u, a)) = disk
+        if y == 0 and x == 0:
+            return "(.)"
+        if y == 0 and x == max_x:
+            return " G "
+        if u == 0:
+            return "[_]"
+        if u > 200:
+            return " # "
+        else:
+            return " . "
+
+    return "\n".join(
+        "".join(render_disk(disks[y][x]) for x in range(w)) for y in range(h)
+    )
 
 
 def viable_count(disks):
-    all = [disk for row in disks for disk in row]
+    all = [disk[1] for row in disks for disk in row]
     count = 0
     for i in range(len(all)):
         u1, a1 = all[i]
@@ -37,12 +87,46 @@ def viable_count(disks):
     return count
 
 
+def score(disks):
+    h = len(disks)
+    w = len(disks[0])
+    max_x = w - 1
+    empty_x, empty_y = next(
+        disk[0] for y in range(h) for x in range(w) if (disk := disks[y][x])[1][0] == 0
+    )
+
+    wall_y = 0
+    while disks[wall_y][max_x][1][0] < 200:
+        wall_y += 1
+    walls_end = max_x
+    while disks[wall_y][walls_end][1][0] >= 200:
+        walls_end -= 1
+
+    steps = 0
+    # move empty left to walls end
+    steps += empty_x - walls_end
+
+    # move empty to top
+    steps += empty_y
+
+    # move empty right until left of Goal
+    steps += w - 2 - walls_end
+
+    # Goal moves into empty
+    steps += 1
+
+    # move empty infront of Goal and move Goal (repeat)
+    steps += 5 * (max_x - 1)
+
+    return steps
+
+
 def part1(disks, args, p1_state):
     return viable_count(disks)
 
 
 def part2(disks, args, p1_state):
-    return "ans2"
+    return score(disks)
 
 
 def jingle(filepath=None, text=None, extra_args=None):
