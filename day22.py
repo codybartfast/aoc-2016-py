@@ -1,3 +1,42 @@
+#  2016 Day 22
+#  ===========
+#
+#  Part 1: 960
+#  Part 2: 225
+#
+#  Timings
+#  ---------------------
+#    Parse:     0.001803
+#   Part 1:     0.015357
+#   Part 2:     0.000052
+#  Elapsed:     0.017267
+
+
+# This puzzle reminded me that these are infact puzzles, not pure coding
+# exercises.  The main purpose of the Part 1 is misdirection.  At first sight it
+# creates the impression that there are many different ways data could be
+# doubled up on a disk creating multiple empty disks.  It also has us (or me)
+# thinking we have to check there is room before any planned move.  Neither is
+# really true.  The 960 viable moves is simply the number of 'regular' disks all
+# of which could fit into the empty disk, movement to the empty disk is the only
+# vialble move.  Further, no disk (except very large ones) has room for the data
+# of two disks, so there can be no doubling up.  Finally largest used is less
+# than the smallest size (ignoring very large disks) so any data can be moved to
+# any disk.  In short the disk usage data is almost irrelevent except for
+# identifying the very large disks and the empty disk.
+#
+# With hindsight there are a couple of clues.  First, the mumber of viable pairs
+# which is quite small, there could have been nearly a million so 960 is
+# suspiciously low, especially when we know there's an empty disk.  Second, is
+# the diagram we see in Part 2.
+#
+#     (.) .  G
+#      .  _  .
+#      #  .  .
+#
+# This is really what the problems is if you ignore all the disk distractions.
+
+
 """
 (.) .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  G
  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
@@ -33,6 +72,12 @@
 
 import re
 
+COORD = 0
+STATS = 1
+
+USED = 0
+AVAIL = 1
+
 
 def parse(text):
     digits = re.compile(r"\d+")
@@ -56,7 +101,8 @@ def render(disks):
     max_x = w - 1
 
     def render_disk(disk):
-        ((x, y), (u, a)) = disk
+        x, y = disk[COORD]
+        u = disk[STATS][USED]
         if y == 0 and x == 0:
             return "(.)"
         if y == 0 and x == max_x:
@@ -74,32 +120,35 @@ def render(disks):
 
 
 def viable_count(disks):
-    all = [disk[1] for row in disks for disk in row]
+    all = [disk[STATS] for row in disks for disk in row]
     count = 0
     for i in range(len(all)):
-        u1, a1 = all[i]
+        used1, avail1 = all[i]
         for j in range(i + 1, len(all)):
-            u2, a2 = all[j]
-            if 0 < u1 <= a2:
+            used2, avail2 = all[j]
+            if 0 < used1 <= avail2:
                 count += 1
-            if 0 < u2 <= a1:
+            if 0 < used2 <= avail1:
                 count += 1
     return count
 
 
-def score(disks):
+def move_data(disks):
     h = len(disks)
     w = len(disks[0])
     max_x = w - 1
     empty_x, empty_y = next(
-        disk[0] for y in range(h) for x in range(w) if (disk := disks[y][x])[1][0] == 0
+        disk[COORD]
+        for y in range(h)
+        for x in range(w)
+        if (disk := disks[y][x])[STATS][USED] == 0
     )
 
     wall_y = 0
-    while disks[wall_y][max_x][1][0] < 200:
+    while disks[wall_y][max_x][STATS][USED] < 200:
         wall_y += 1
     walls_end = max_x
-    while disks[wall_y][walls_end][1][0] >= 200:
+    while disks[wall_y][walls_end][STATS][USED] >= 200:
         walls_end -= 1
 
     steps = 0
@@ -115,7 +164,7 @@ def score(disks):
     # Goal moves into empty
     steps += 1
 
-    # move empty infront of Goal and move Goal (repeat)
+    # move empty in front of Goal and move Goal (and repeat)
     steps += 5 * (max_x - 1)
 
     return steps
@@ -126,7 +175,7 @@ def part1(disks, args, p1_state):
 
 
 def part2(disks, args, p1_state):
-    return score(disks)
+    return move_data(disks)
 
 
 def jingle(filepath=None, text=None, extra_args=None):
