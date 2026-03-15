@@ -19,11 +19,10 @@
 # thinking we have to check there is room before any planned move.  Neither is
 # really true.  The 960 viable moves is simply the number of 'regular' disks all
 # of which could fit into the empty disk, movement to the empty disk is the only
-# vialble move.  Further, no disk (except very large ones) has room for the data
-# of two disks, so there can be no doubling up.  Finally largest used is less
-# than the smallest size (ignoring very large disks) so any data can be moved to
-# any disk.  In short the disk usage data is almost irrelevent except for
-# identifying the very large disks and the empty disk.
+# vialble move.  Further, the largest used value is less than the smallest size
+# (ignoring very large disks) so any data can be moved to any disk.  In short
+# the disk usage data is almost irrelevent except for identifying the very large
+# disks and the empty disk.
 #
 # With hindsight there are a couple of clues.  First, the mumber of viable pairs
 # which is quite small, there could have been nearly a million so 960 is
@@ -34,7 +33,7 @@
 #      .  _  .
 #      #  .  .
 #
-# This is really what the problems is if you ignore all the disk distractions.
+# If you ignore all the distractions then this is what the problem really is.
 
 
 """
