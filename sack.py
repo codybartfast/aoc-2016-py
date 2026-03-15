@@ -11,6 +11,7 @@ YEAR = "2016"
 #   - maybe only inlcude args > 2 (requiring filemame) so args are consistently
 #     separate from file
 #   - maybe ##### to separate runner from interesting stuff
+#   - format timings like time:w
 
 def get_day():
     filename = Path(sys._getframe(2).f_code.co_filename).name
