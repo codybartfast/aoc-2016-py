@@ -7,13 +7,16 @@
 #  Timings
 #  ---------------------
 #    Parse:     0.000023
-#   Part 1:     0.006993
-#   Part 2:   328.344386
-#  Elapsed:   328.351503
+#   Part 1:     0.002932
+#   Part 2:     0.002882
+#  Elapsed:     0.005880
 
 
 PC = 0
 REG_A = 1
+REG_B = 2
+REG_C = 3
+REG_D = 4
 
 
 def parse(text):
@@ -48,6 +51,15 @@ def parse(text):
 
 def run(prog, regs):
     while regs[0] < len(prog):
+        #
+        # Don't bunnies usually multiply?
+        if regs[PC] == 2:
+            regs[REG_A] = regs[REG_A] * regs[REG_B]
+            regs[REG_C] = 0
+            regs[REG_D] = 0
+            regs[PC] = 10
+            continue
+
         (instr, _), args = prog[regs[0]]
         match instr:
             case "cpy":
