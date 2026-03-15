@@ -1,8 +1,19 @@
+#  2016 Day 23
+#  ===========
+#
+#  Part 1: 12315
+#  Part 2: 479008875
+#
+#  Timings
+#  ---------------------
+#    Parse:     0.000023
+#   Part 1:     0.006993
+#   Part 2:   328.344386
+#  Elapsed:   328.351503
+
+
 PC = 0
-# A = 1
-# B = 2
-# C = 3
-# D = 4
+REG_A = 1
 
 
 def parse(text):
@@ -74,16 +85,17 @@ def run(prog, regs):
 
 def boot(a=0):
     regs = [0] * 5
-    regs[1] = a
+    regs[REG_A] = a
     return regs
 
 
 def part1(prog, args, p1_state):
-    return run(prog, boot(7))
+    prog = [(list(instr), args) for instr, args in prog]
+    return run(prog, boot(7))[REG_A]
 
 
 def part2(prog, args, p1_state):
-    return "ans2"
+    return run(prog, boot(12))[REG_A]
 
 
 def jingle(filepath=None, text=None, extra_args=None):
