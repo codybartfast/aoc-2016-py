@@ -1,9 +1,19 @@
+#  2016 Day 24
+#  ===========
+#
+#  Part 1: 428
+#  Part 2: 680
+#
+#  Timings
+#  ---------------------
+#    Parse:     0.000247
+#   Part 1:     0.011070
+#   Part 2:     0.000000
+#  Elapsed:     0.011361
+
+
 import array
 from itertools import permutations
-
-# On Day 22 I started going down what would have been a horrible brute force
-# path and looked at arrary.array, so I'm using here out of curiosity, but I
-# suspect it's overkill
 
 
 class HVAC:
@@ -15,7 +25,6 @@ class HVAC:
         w, h = self.dimensions
         plan = self.plan
         grid = ["".join(chr(plan[w * y + x]) for x in range(w)) for y in range(h)]
-        # grid = ["".join("█" if (c := chr(plan[w * y + x])) == "#" else c for x in range(w)) for y in range(h)]
         grid.append(f"[{w} x {h}]")
         return "\n".join(grid)
 
@@ -82,24 +91,29 @@ def find_distances(hvac):
 
 
 def find_route(distances, poi):
-    # print(distances, poi)
     min = 10**18
+    min2 = 10**18
     for route in permutations(poi):
         dist = distances['0', route[0]]
         dist += sum(distances[route[i], route[i + 1]] for i in range(len(route) - 1))
         if dist < min:
             min = dist
-    return min
+        dist2 = dist + distances[route[-1], '0']
+        if dist2 < min2:
+            min2 = dist2
+    return min, min2
 
 
 def part1(hvac, args, p1_state):
     distances = find_distances(hvac)
     poi = set(p for p, _ in distances.keys() if p != '0')
-    return find_route(distances, poi)
+    min1, min2 = find_route(distances, poi)
+    p1_state.value = min2
+    return min1
 
 
 def part2(hvac, args, p1_state):
-    return "ans2"
+    return p1_state.value
 
 
 def jingle(filepath=None, text=None, extra_args=None):
