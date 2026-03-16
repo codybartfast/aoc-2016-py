@@ -6,10 +6,10 @@
 #
 #  Timings
 #  ---------------------
-#    Parse:     0.000247
-#   Part 1:     0.011070
+#    Parse:     0.000199
+#   Part 1:     0.007976
 #   Part 2:     0.000000
-#  Elapsed:     0.011361
+#  Elapsed:     0.008209
 
 
 import array
@@ -31,10 +31,7 @@ class HVAC:
 
 def parse(text):
     lines = text.splitlines()
-
-    plan = array.array("B")
-    for line in lines:
-        plan.extend(map(ord, line))
+    plan = array.array("B", [ord(c) for line in lines for c in line])
 
     return HVAC(plan, (len(lines[0]), len(lines)))
 
@@ -45,13 +42,12 @@ def find_nothing(hvac: HVAC):
     for i, b in enumerate(hvac.plan):
         if b == nothing:
             return i
-            # return (i % w, i // w)
 
 
 def distances_from(hvac: HVAC, start_idx, start_label):
     plan = hvac.plan
-    w, _ = hvac.dimensions
-    diffs = [-w, -1, 1, w]
+    width, _ = hvac.dimensions
+    deltas = [-width, -1, 1, width]
 
     edge = [start_idx]
     known = set(edge)
@@ -60,54 +56,50 @@ def distances_from(hvac: HVAC, start_idx, start_label):
     while edge:
         dist += 1
         new_edge = []
-        for e in edge:
-            for diff in diffs:
-                i = e + diff
-                b = plan[i]
-                if b != 0x23:  # '#'
-                    if i not in known:
-                        known.add(i)
-                        new_edge.append(i)
-                        if 0x30 <= b <= 0x39:  # '0' - '9'
-                            distances.append(((start_label, chr(b)), (i, dist)))
+        for idx in edge:
+            for delta in deltas:
+                adj_idx = idx + delta
+                byt = plan[adj_idx]
+                if byt != 0x23 and adj_idx not in known:  # 0x23 = '#'
+                    known.add(adj_idx)
+                    new_edge.append(adj_idx)
+                    if 0x30 <= byt <= 0x39:  # '0' - '9'
+                        distances.append(((start_label, chr(byt)), (adj_idx, dist)))
         edge = new_edge
-
     return distances
 
 
 def find_distances(hvac):
-    distances = {}
-    zero = find_nothing(hvac)
-    dists_from_start = distances_from(hvac, zero, "0")
-    distances.update((pair, dist) for pair, (_, dist) in dists_from_start)
-    poi = [(idx, end) for (_, end), (idx, dist) in dists_from_start]
+    zero_idx = find_nothing(hvac)
+    dists_from_start = distances_from(hvac, zero_idx, "0")
+    distances = dict((pair, dist) for pair, (_, dist) in dists_from_start)
 
+    poi = [(idx, end) for (_, end), (idx, dist) in dists_from_start]
     for poi_idx, poi_label in poi:
         distances.update(
             (pair, dist) for pair, (_, dist) in distances_from(hvac, poi_idx, poi_label)
         )
-
     return distances
 
 
-def find_route(distances, poi):
-    min = 10**18
+def find_shortest(distances, poi):
+    min1 = 10**18
     min2 = 10**18
     for route in permutations(poi):
-        dist = distances['0', route[0]]
-        dist += sum(distances[route[i], route[i + 1]] for i in range(len(route) - 1))
-        if dist < min:
-            min = dist
-        dist2 = dist + distances[route[-1], '0']
+        dist1 = distances["0", route[0]]
+        dist1 += sum([distances[route[i], route[i + 1]] for i in range(len(route) - 1)])
+        if dist1 < min1:
+            min1 = dist1
+        dist2 = dist1 + distances[route[-1], "0"]
         if dist2 < min2:
             min2 = dist2
-    return min, min2
+    return min1, min2
 
 
 def part1(hvac, args, p1_state):
     distances = find_distances(hvac)
-    poi = set(p for p, _ in distances.keys() if p != '0')
-    min1, min2 = find_route(distances, poi)
+    poi = set(p for p, _ in distances.keys() if p != "0")
+    min1, min2 = find_shortest(distances, poi)
     p1_state.value = min2
     return min1
 
