@@ -8,10 +8,10 @@ YEAR = "2016"
 #   - template - could make jingle singature (text, filepath, args) because
 #     keeps filepath and args togeather and more closely reflects logic: if get
 #     text then don't look at filepath
-#   - maybe only inlcude args > 2 (requiring filemame) so args are consistently
-#     separate from file
 #   - maybe ##### to separate runner from interesting stuff
-#   - format timings like time:w
+#   - format timings like time (or go)
+#   - add completion date
+#   - add machine info ?
 
 def get_day():
     filename = Path(sys._getframe(2).f_code.co_filename).name
